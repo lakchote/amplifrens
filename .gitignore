@@ -8,3 +8,7 @@ typechain-types
 #Hardhat files
 cache
 artifacts
+gas_report*.txt
+
+# OpenZeppelin Upgrades (dev)
+.openzeppelin/unknown-*.json
