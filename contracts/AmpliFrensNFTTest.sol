@@ -9,7 +9,8 @@ contract AmpliFrensNFTTest is AmpliFrensNFT {
     function burn(uint256 _tokenId) public pure {
         _burn(_tokenId);
     }
-    function parentBaseURI() public view returns(string memory) {
+
+    function parentBaseURI() public view returns (string memory) {
         return _baseURI();
     }
 }

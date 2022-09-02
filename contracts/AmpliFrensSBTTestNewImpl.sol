@@ -238,7 +238,7 @@ contract AmpliFrensSBTTestNewImpl is
         view
         returns (uint256)
     {
-        uint256[] memory tokenIds = _tokensForAddress[owner]; /// @dev data needs to be first stored in memory to read it
+        uint256[] memory tokenIds = _tokensForAddress[owner]; /// @dev data needs to be stored in memory to be read
 
         return tokenIds[index];
     }

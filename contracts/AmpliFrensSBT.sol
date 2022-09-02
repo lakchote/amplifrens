@@ -287,7 +287,10 @@ contract AmpliFrensSBT is
         isNotOutOfBounds(tokenId)
         returns (string memory)
     {
-        return string(abi.encodePacked(_baseURI(), Strings.toString(tokenId), ".json"));
+        return
+            string(
+                abi.encodePacked(_baseURI(), Strings.toString(tokenId), ".json")
+            );
     }
 
     receive() external payable onlyRole(UPGRADER_ROLE) {}
