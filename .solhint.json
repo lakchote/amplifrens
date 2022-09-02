@@ -1,7 +1,8 @@
 {
   "extends": ["solhint:default"],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "indent": false 
   },
   "plugins": ["prettier"]
 }
