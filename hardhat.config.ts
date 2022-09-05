@@ -25,7 +25,8 @@ const config: HardhatUserConfig = {
     gasPrice: 21,
     outputFile: "gas_report.txt",
     noColors: true,
-    token: "MATIC"
+    token: "MATIC",
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY
   },
 };
 
