@@ -278,6 +278,104 @@ describe("Soulbound Token", async () => {
     });
   });
 
+  describe("Statuses", async () => {
+    it("Should throw an error if an user hasn't any tokens", async () => {
+      await expect(
+        sbtContract.getStatus(accounts[2].address)
+      ).to.be.revertedWith("The address has 0 tokens.");
+    });
+    it("Should get the correct status if the address has earnt 5 tokens", async () => {
+      for (let i = 0; i <= 4; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint(
+          accounts[1].address,
+          contributionCategory,
+          timestamp,
+          votes,
+          title,
+          url
+        );
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq("Anon");
+    });
+    it("Should get the correct status if the address has earnt 10 tokens", async () => {
+      for (let i = 0; i <= 9; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint(
+          accounts[1].address,
+          contributionCategory,
+          timestamp,
+          votes,
+          title,
+          url
+        );
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq("Degen");
+    });
+    it("Should get the correct status if the address has earnt 15 tokens", async () => {
+      for (let i = 0; i <= 14; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint(
+          accounts[1].address,
+          contributionCategory,
+          timestamp,
+          votes,
+          title,
+          url
+        );
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq("Pepe");
+    });
+    it("Should get the correct status if the address has earnt 30 tokens", async () => {
+      for (let i = 0; i <= 29; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint(
+          accounts[1].address,
+          contributionCategory,
+          timestamp,
+          votes,
+          title,
+          url
+        );
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq("Contributoor");
+    });
+    it("Should get the correct status if the address has earnt 60 tokens", async () => {
+      for (let i = 0; i <= 59; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint(
+          accounts[1].address,
+          contributionCategory,
+          timestamp,
+          votes,
+          title,
+          url
+        );
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq("Aggregatoor");
+    });
+    it("Should get the correct status if the address has earnt 100 tokens or more", async () => {
+      for (let i = 0; i <= 99; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint(
+          accounts[1].address,
+          contributionCategory,
+          timestamp,
+          votes,
+          title,
+          url
+        );
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq("Oracle");
+    });
+  });
+
   describe("Revocation", async () => {
     it("Should identify a token as invalid if it has been revoked", async () => {
       const revokeTx = await sbtContract.revoke(1);

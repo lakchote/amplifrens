@@ -52,6 +52,16 @@ contract AmpliFrensSBT is
         Misc
     }
 
+    /// @notice Contains the different statuses depending on tokens earnt
+    enum FrenStatus {
+        Anon, /// @notice 5 tokens
+        Degen, /// @notice 10 tokens
+        Pepe, /// @notice 15 tokens
+        Contributoor, /// @notice 30 tokens
+        Aggregatoor, /// @notice 60 tokens
+        Oracle /// @notice 100 tokens
+    }
+
     /**
      *  @dev Use tight packing to save up on storage cost
      *  4 storage slots used (string takes up 64 bytes or 2 slots in the storage)
@@ -252,6 +262,31 @@ contract AmpliFrensSBT is
         returns (uint256)
     {
         return index; /// @dev index == tokenId
+    }
+
+    function getStatus(address _address) external view returns (string memory) {
+        require(
+            _tokensForAddress[_address].length != 0,
+            "The address has 0 tokens."
+        );
+        uint256 totalTokens = _tokensForAddress[_address].length;
+        if (totalTokens >= 5 && totalTokens < 10) {
+            return "Anon";
+        }
+        if (totalTokens >= 10 && totalTokens < 15) {
+            return "Degen";
+        }
+        if (totalTokens >= 15 && totalTokens < 30) {
+            return "Pepe";
+        }
+        if (totalTokens >= 30 && totalTokens < 60) {
+            return "Contributoor";
+        }
+        if (totalTokens >= 60 && totalTokens < 100) {
+            return "Aggregatoor";
+        }
+
+        return "Oracle";
     }
 
     function revoke(uint256 tokenId)
