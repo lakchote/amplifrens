@@ -23,8 +23,5 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Compile contracts
-        run: yarn hardhat compile
-
-      - name: Run tests
-        run: yarn hardhat test
+      - name: Compile contracts and run coverage
+        run: yarn hardhat coverage
