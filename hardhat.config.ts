@@ -1,15 +1,34 @@
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-solhint";
 import "@openzeppelin/hardhat-upgrades";
-import '@typechain/hardhat';
-import "hardhat-gas-reporter"
+import "@typechain/hardhat";
+import "hardhat-gas-reporter";
 
 dotenv.config();
 
+const {
+  POLYGON_MUMBAI_RPC_PROVIDER,
+  POLYGON_MAINNET_RPC_PROVIDER,
+  POLYGONSCAN_API_KEY,
+  COINMARKETCAP_API_KEY,
+  REPORT_GAS,
+  WALLET_PRIVATE_KEY,
+} = process.env;
+
 const config: HardhatUserConfig = {
+  networks: {
+    mumbai: {
+      url: POLYGON_MUMBAI_RPC_PROVIDER,
+      accounts: [WALLET_PRIVATE_KEY!],
+    },
+    matic: {
+      url: POLYGON_MAINNET_RPC_PROVIDER,
+      accounts: [WALLET_PRIVATE_KEY!],
+    },
+  },
   solidity: {
     version: "0.8.16",
     settings: {
@@ -20,13 +39,16 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    enabled: (process.env.REPORT_GAS) ? true : false,
+    enabled: REPORT_GAS ? true : false,
     currency: "USD",
     gasPrice: 21,
     outputFile: "gas_report.txt",
     noColors: true,
     token: "MATIC",
-    coinmarketcap: process.env.COINMARKETCAP_API_KEY
+    coinmarketcap: COINMARKETCAP_API_KEY,
+  },
+  etherscan: {
+    apiKey: POLYGONSCAN_API_KEY,
   },
 };
 
