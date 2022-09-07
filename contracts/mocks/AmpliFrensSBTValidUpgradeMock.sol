@@ -7,14 +7,23 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "./interfaces/IERC4671.sol";
-import "./interfaces/IERC4671Enumerable.sol";
-import "./interfaces/IERC4671Metadata.sol";
+import {IERC4671, IERC165} from "../interfaces/IERC4671.sol";
+import {IERC4671Enumerable} from "../interfaces/IERC4671Enumerable.sol";
+import {IERC4671Metadata} from "../interfaces/IERC4671Metadata.sol";
+import {Constants} from "../libraries/Constants.sol";
+import {Statuses} from "../libraries/Statuses.sol";
+import {DataTypes} from "../libraries/DataTypes.sol";
 
-/// @notice This is a test contract to check upgradeability of AmpliFrensSBT contract
-/// @dev Upgradeability test for UUPS
-/// @custom:security-contact lakchote@icloud.com
-contract AmpliFrensSBTTestNewImpl is
+/**
+ * @title AmpliFrensSBT
+ * @author Lucien Akchoté
+ *
+ * @notice This is a mock to check upgradeability of AmpliFrensSBT contract
+ * @dev Upgradeability test for UUPS
+ * @custom:security-contact lakchote@icloud.com
+ * @custom:oz-upgrades-unsafe-allow external-library-linking
+ */
+contract AmpliFrensSBTValidUpgradeMock is
     Initializable,
     PausableUpgradeable,
     AccessControlUpgradeable,
@@ -32,48 +41,17 @@ contract AmpliFrensSBTTestNewImpl is
     /// @dev Number of unique holders of the token
     Counters.Counter private _holdersCount;
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-
-    string public constant TOKEN_NAME = "AmpliFrens Contribution Award";
-
-    string public constant TOKEN_SYMBOL = "AFRENCONTRIBUTION";
-
-    /// @notice Contains the different contributions categories
-    enum ContributionCategory {
-        NFT,
-        Article,
-        DeFi,
-        Security,
-        Thread,
-        GameFi,
-        Video,
-        Misc
-    }
-
-    /**
-     *  @dev Use tight packing to save up on storage cost
-     *  4 storage slots used (string takes up 64 bytes or 2 slots in the storage)
-     */
-    struct Contribution {
-        address owner; /// @dev 20 bytes
-        ContributionCategory category; /// @dev 8 bytes
-        uint32 timestamp; /// @dev 4 bytes
-        bool valid; /// @dev 1 byte
-        uint248 votes; /// @dev 31 bytes
-        bytes32 title; /// @dev 32 bytes
-        string url; /// @dev 64 bytes
-    }
-
     /// @dev Maps token ids with the most upvoted contributions
-    mapping(uint256 => Contribution) private _tokens;
+    mapping(uint256 => DataTypes.Contribution) private _tokens;
 
     /// @dev Maps an EOA address with its contributions tokens
     mapping(address => uint256[]) private _tokensForAddress;
 
     /// @dev Counter for valid tokens for addresses
     mapping(address => uint256) private _validTokensForAddress;
+
+    /// @dev Number of tokens minted
+    uint256 private _emittedCount;
 
     /// @notice Interval to ensure minting can occur at specific period
     /// @dev Mint interval that will be compared with two timestamps : `lastBlockTimeStamp` and `block.timestamp`
@@ -83,26 +61,12 @@ contract AmpliFrensSBTTestNewImpl is
     /// @dev Equals to last mint tx's block.timestamp or block.timestamp at contract initialization
     uint256 public lastBlockTimestamp;
 
-    /// @dev Number of tokens minted
-    uint256 private _emittedCount;
-
     /// @dev Base Token URI for metadata
     string public baseURI;
 
-    /// @notice Enforces compliance with interval period when minting function is called
-    modifier guardIntervalForMinting() {
-        require(
-            (block.timestamp - lastBlockTimestamp) > mintInterval,
-            "Interval target for minting is not met yet."
-        );
-        _;
-    }
-
+    /// @dev Check if token index requested has been minted
     modifier isNotOutOfBounds(uint256 index) {
-        require(
-            index <= _tokenIdCounter.current() && index != 0,
-            "Index is out of bounds."
-        );
+        require(index <= _tokenIdCounter.current() && index != 0, "Out of bounds");
         _;
     }
 
@@ -111,52 +75,52 @@ contract AmpliFrensSBTTestNewImpl is
         _disableInitializers();
     }
 
-    function newFunction() public pure returns (string memory) {
-        return "New function for contract v2";
-    }
-
+    /// @dev Serves as constructor for proxy
     function initialize() public initializer {
         __Pausable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(PAUSER_ROLE, msg.sender);
-        _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(Constants.PAUSER_ROLE, msg.sender);
+        _grantRole(Constants.UPGRADER_ROLE, msg.sender);
         lastBlockTimestamp = block.timestamp;
         mintInterval = 1 days;
         _tokenIdCounter.increment();
     }
 
-    function pause() public onlyRole(PAUSER_ROLE) {
+    /// @dev New function added to test for upgradeability
+    function newFunction() public pure returns (string memory) {
+        return "New function for contract v2";
+    }
+
+    function pause() external onlyRole(Constants.PAUSER_ROLE) {
         _pause();
     }
 
-    function unpause() public onlyRole(PAUSER_ROLE) {
+    function unpause() external onlyRole(Constants.PAUSER_ROLE) {
         _unpause();
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyRole(UPGRADER_ROLE)
-    {}
+    /// @inheritdoc UUPSUpgradeable
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(Constants.UPGRADER_ROLE) {}
 
     function mint(
         address to,
-        ContributionCategory category,
-        uint32 timestamp,
-        uint248 votes,
-        bytes32 title,
+        uint8 category,
+        uint40 timestamp,
+        uint40 votes,
+        string calldata title,
         string calldata url
-    ) external guardIntervalForMinting onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) {
+        require((block.timestamp - lastBlockTimestamp) > mintInterval, "Minting interval not met");
         uint256 currentTokenId = _tokenIdCounter.current();
         _emittedCount = currentTokenId;
-        _tokens[currentTokenId] = Contribution(
+        _tokens[currentTokenId] = DataTypes.Contribution(
             to,
-            category,
-            timestamp,
+            DataTypes.ContributionCategory(category),
             true, /// @dev valid by default at the time of minting
+            timestamp,
             votes,
             title,
             url
@@ -188,17 +152,11 @@ contract AmpliFrensSBTTestNewImpl is
 
     /// @inheritdoc IERC4671
     function balanceOf(address owner) external view returns (uint256 balance) {
-        uint256[] memory tokenIds = _tokensForAddress[owner];
-        balance = tokenIds.length;
+        balance = _tokensForAddress[owner].length;
     }
 
     /// @inheritdoc IERC4671
-    function ownerOf(uint256 tokenId)
-        external
-        view
-        isNotOutOfBounds(tokenId)
-        returns (address)
-    {
+    function ownerOf(uint256 tokenId) external view isNotOutOfBounds(tokenId) returns (address) {
         return _tokens[tokenId].owner;
     }
 
@@ -214,12 +172,12 @@ contract AmpliFrensSBTTestNewImpl is
 
     /// @inheritdoc IERC4671Metadata
     function name() external pure returns (string memory) {
-        return TOKEN_NAME;
+        return Constants.TOKEN_NAME;
     }
 
     /// @inheritdoc IERC4671Metadata
     function symbol() external pure returns (string memory) {
-        return TOKEN_SYMBOL;
+        return Constants.TOKEN_SYMBOL;
     }
 
     /// @inheritdoc IERC4671Enumerable
@@ -233,61 +191,42 @@ contract AmpliFrensSBTTestNewImpl is
     }
 
     /// @inheritdoc IERC4671Enumerable
-    function tokenOfOwnerByIndex(address owner, uint256 index)
-        external
-        view
-        returns (uint256)
-    {
-        uint256[] memory tokenIds = _tokensForAddress[owner]; /// @dev data needs to be stored in memory to be read
+    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256) {
+        uint256[] memory tokenIds = _tokensForAddress[owner];
 
         return tokenIds[index];
     }
 
     /// @inheritdoc IERC4671Enumerable
-    function tokenByIndex(uint256 index)
-        external
-        view
-        isNotOutOfBounds(index)
-        returns (uint256)
-    {
+    function tokenByIndex(uint256 index) external view isNotOutOfBounds(index) returns (uint256) {
         return index; /// @dev index == tokenId
     }
 
-    function revoke(uint256 tokenId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        isNotOutOfBounds(tokenId)
-    {
+    function getStatus(address _address) external view returns (string memory) {
+        require(_tokensForAddress[_address].length != 0, "0 tokens");
+        return Statuses.getStatus(_tokensForAddress[_address].length);
+    }
+
+    function revoke(uint256 tokenId) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) isNotOutOfBounds(tokenId) {
         _tokens[tokenId].valid = false;
         address owner = _tokens[tokenId].owner;
         _validTokensForAddress[owner] -= 1;
         emit Revoked(owner, tokenId);
     }
 
-    function setBaseURI(string calldata uri)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = uri;
     }
 
     function _baseURI() internal view returns (string memory) {
-        if (bytes(baseURI).length == 0) {
-            return "";
-        }
-
-        return baseURI;
+        return (bytes(baseURI).length == 0) ? "" : baseURI;
     }
 
-    function tokenURI(uint256 tokenId)
-        external
-        view
-        isNotOutOfBounds(tokenId)
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(_baseURI(), Strings.toString(tokenId), ".json")
-            );
+    function tokenURI(uint256 tokenId) external view isNotOutOfBounds(tokenId) returns (string memory) {
+        return string(abi.encodePacked(_baseURI(), Strings.toString(tokenId), ".json"));
     }
+
+    receive() external payable onlyRole(Constants.UPGRADER_ROLE) {}
+
+    fallback() external onlyRole(DEFAULT_ADMIN_ROLE) {}
 }
