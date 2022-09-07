@@ -27,9 +27,5 @@ contract AmpliFrensSBTWrongUpgradeMock is UUPSUpgradeable {
         mintInterval = 1 days;
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        virtual
-        override
-    {}
+    function _authorizeUpgrade(address newImplementation) internal virtual override {}
 }
