@@ -1,5 +1,8 @@
 name: Tests
 
+env:
+  WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
+
 on:
   push:
     branches: 
