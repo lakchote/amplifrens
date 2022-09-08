@@ -22,11 +22,11 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       url: POLYGON_MUMBAI_RPC_PROVIDER,
-      accounts: [WALLET_PRIVATE_KEY!],
+      accounts: [WALLET_PRIVATE_KEY ?? ""],
     },
     matic: {
       url: POLYGON_MAINNET_RPC_PROVIDER,
-      accounts: [WALLET_PRIVATE_KEY!],
+      accounts: [WALLET_PRIVATE_KEY ?? ""],
     },
   },
   solidity: {
