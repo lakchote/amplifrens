@@ -29,5 +29,8 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Compile contracts and run coverage
+      - name: Generate typechain
+        run: yarn hardhat typechain
+
+      - name: Run coverage
         run: yarn hardhat coverage
