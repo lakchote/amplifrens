@@ -110,7 +110,7 @@ contract AmpliFrensSBTValidUpgradeMock is
         uint8 category,
         uint40 timestamp,
         uint40 votes,
-        string calldata title,
+        bytes32 title,
         string calldata url
     ) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) {
         require((block.timestamp - lastBlockTimestamp) > mintInterval, "Minting interval not met");
@@ -172,12 +172,12 @@ contract AmpliFrensSBTValidUpgradeMock is
 
     /// @inheritdoc IERC4671Metadata
     function name() external pure returns (string memory) {
-        return Constants.TOKEN_NAME;
+        return Constants.SBT_TOKEN_NAME;
     }
 
     /// @inheritdoc IERC4671Metadata
     function symbol() external pure returns (string memory) {
-        return Constants.TOKEN_SYMBOL;
+        return Constants.SBT_TOKEN_SYMBOL;
     }
 
     /// @inheritdoc IERC4671Enumerable
