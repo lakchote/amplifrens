@@ -31,8 +31,10 @@ library DataTypes {
     }
 
     /**
+     *  @notice Contains the basic information of a contribution
+     *
      *  @dev Use tight packing to save up on storage cost
-     *  5 storage slots used (string takes up 64 bytes or 2 slots in the storage)
+     *  4 storage slots used (string takes up 64 bytes or 2 slots in the storage)
      */
     struct Contribution {
         address owner; /// @dev 20 bytes
@@ -40,7 +42,17 @@ library DataTypes {
         bool valid; /// @dev 1 byte
         uint40 timestamp; /// @dev 5 bytes
         uint40 votes; /// @dev 5 bytes
-        string title; /// @dev 64 bytes
+        bytes32 title; /// @dev 32 bytes
         string url; /// @dev 64 bytes
+    }
+
+    /// @notice Contains the basic information of a profile
+    struct Profile {
+        bytes32 lensHandle;
+        bytes32 discordHandle;
+        bytes32 twitterHandle;
+        bytes32 username;
+        bytes32 email;
+        string websiteUrl;
     }
 }

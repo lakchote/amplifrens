@@ -53,11 +53,11 @@ contract AmpliFrensSBT is
     /// @dev Number of tokens minted
     uint256 private _emittedCount;
 
-    /// @notice Interval to ensure minting can occur at specific period
+    /// @notice Interval to ensure minting can occur at a specific period
     /// @dev Mint interval that will be compared with two timestamps : `lastBlockTimeStamp` and `block.timestamp`
     uint256 public mintInterval;
 
-    /// @notice Used in conjuction with mint interval and current block timestamp when minting function is called
+    /// @notice Used in conjunction with mint interval and current block timestamp when minting function is called
     /// @dev Equals to last mint tx's block.timestamp or block.timestamp at contract initialization
     uint256 public lastBlockTimestamp;
 
@@ -65,7 +65,7 @@ contract AmpliFrensSBT is
     string public baseURI;
 
     /**
-     * @dev Check if token index requested has been minted
+     * @dev Check if the token index requested has been minted
      *
      * @param index The token id to verify existence for
      */
@@ -79,7 +79,7 @@ contract AmpliFrensSBT is
         _disableInitializers();
     }
 
-    /// @dev Serves as constructor for proxy
+    /// @dev Serves as a constructor for the proxy
     function initialize() public initializer {
         __Pausable_init();
         __AccessControl_init();
@@ -107,9 +107,9 @@ contract AmpliFrensSBT is
     function _authorizeUpgrade(address) internal view override onlyRole(Constants.UPGRADER_ROLE) {}
 
     /**
-     * @notice Mints the Soulbound Token to recipient `to` if interval is met and functionality is not paused
+     * @notice Mints the Soulbound Token to recipient `to` if the interval is met and functionality is not paused
      * @dev Individual params for `DataTypes.Contribution` are specified instead of providing the struct directly
-     * to save gas, see https://ethereum.org/en/developers/tutorials/downsizing-contracts-to-fight-the-contract-size-limit/#avoid-passing-structs-to-functions
+     * to save gas
      *
      * @param to The recipient to mint Soulbound token
      * @param category The contribution category
@@ -123,7 +123,7 @@ contract AmpliFrensSBT is
         uint8 category,
         uint40 timestamp,
         uint40 votes,
-        string calldata title,
+        bytes32 title,
         string calldata url
     ) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) {
         require((block.timestamp - lastBlockTimestamp) > mintInterval, "Minting interval not met");
@@ -186,12 +186,12 @@ contract AmpliFrensSBT is
 
     /// @inheritdoc IERC4671Metadata
     function name() external pure returns (string memory) {
-        return Constants.TOKEN_NAME;
+        return Constants.SBT_TOKEN_NAME;
     }
 
     /// @inheritdoc IERC4671Metadata
     function symbol() external pure returns (string memory) {
-        return Constants.TOKEN_SYMBOL;
+        return Constants.SBT_TOKEN_SYMBOL;
     }
 
     /// @inheritdoc IERC4671Enumerable
@@ -242,7 +242,7 @@ contract AmpliFrensSBT is
     }
 
     /**
-     * @notice Sets the base uri `uri` for tokens, it should end with a "/"
+     * @notice Sets the base URI `uri` for tokens, it should end with a "/"
      *
      * @param uri The base URI
      */
