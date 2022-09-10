@@ -12,7 +12,7 @@ library Constants {
 
     bytes32 internal constant UPGRADER_ROLE = keccak256("AFREN_UPGRADER_ROLE");
 
-    string public constant TOKEN_NAME = "AmpliFrens Contribution Award";
+    string public constant SBT_TOKEN_NAME = "AmpliFrens Contribution Award";
 
-    string public constant TOKEN_SYMBOL = "AFRENCONTRIBUTION";
+    string public constant SBT_TOKEN_SYMBOL = "AFRENCONTRIBUTION";
 }
