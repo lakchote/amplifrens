@@ -68,7 +68,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, AccessControl
     }
 
     /**
-     * @notice Transfers the token `tokenId` from address `from`to address `to`
+     * @notice Transfers the token `tokenId` from address `from` to address `to`
      *
      * @param from The current owner's address for the token
      * @param to The recipient of the token
@@ -84,9 +84,9 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, AccessControl
     }
 
     /**
-     * @notice Defines the royalties to go to address `receiver` with fee set to `feeNumerator`
+     * @notice Defines the royalties to go to address `receiver` with the fee set to `feeNumerator`
      * (divided by denominator expressed in basis points i.e 10000)
-     * @dev Royalties are not enforced and depend on the different exchanges policies
+     * @dev Royalties are not enforced and depend on the different exchange's policies
      *  Marketplaces supporting the EIP-2981 royalty standard will use it for royalty payment
      *
      * @param receiver The address to receive royalties
@@ -103,7 +103,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, AccessControl
     }
 
     /**
-     * @notice Sets the base uri `uri` for tokens, it should end with a "/"
+     * @notice Sets the base URI `uri` for tokens, it should end with a "/"
      *
      * @param uri The base URI
      */
@@ -121,7 +121,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, AccessControl
     }
 
     /**
-     * @notice Gets the token URI for token with id `tokenId`
+     * @notice Gets the token URI for the token with id `tokenId`
      *
      * @param tokenId The token id to retrieve the URI
      */
