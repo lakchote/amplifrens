@@ -14,13 +14,26 @@ describe("NFT", async () => {
 
   beforeEach(async () => {
     accounts = await ethers.getSigners();
-    const nftContractFactory = (await ethers.getContractFactory("AmpliFrensNFT")) as AmpliFrensNFT__factory;
-    nftContract = await nftContractFactory.deploy();
+    const tokenURIHelperLib = await (await (await ethers.getContractFactory("TokenURI")).deploy()).deployed();
+    const pseudoModifierLib = await (await (await ethers.getContractFactory("PseudoModifier")).deploy()).deployed();
+
+    const nftContractFactory = (await ethers.getContractFactory("AmpliFrensNFT", {
+      libraries: {
+        TokenURI: tokenURIHelperLib.address,
+        PseudoModifier: pseudoModifierLib.address,
+      },
+    })) as AmpliFrensNFT__factory;
+    nftContract = await nftContractFactory.deploy(accounts[0].address);
     await nftContract.deployed();
     const setBaseURITx = await nftContract.setBaseURI("https://www.example.com/");
     await setBaseURITx.wait();
-    const nftMockContractFactory = (await ethers.getContractFactory("AmpliFrensNFTMock")) as AmpliFrensNFTMock__factory;
-    nftMockContract = await nftMockContractFactory.deploy();
+    const nftMockContractFactory = (await ethers.getContractFactory("AmpliFrensNFTMock", {
+      libraries: {
+        TokenURI: tokenURIHelperLib.address,
+        PseudoModifier: pseudoModifierLib.address,
+      },
+    })) as AmpliFrensNFTMock__factory;
+    nftMockContract = await nftMockContractFactory.deploy(accounts[0].address);
     await nftMockContract.deployed();
   });
 
@@ -28,35 +41,33 @@ describe("NFT", async () => {
     it("Should revert if max supply is reached and minting is triggered", async () => {
       const maxSupply = Number(await nftContract.MAX_SUPPLY());
       for (let i = 1; i <= maxSupply; i++) {
-        const mintTx = await nftContract.safeMint(accounts[0].address, i.toString());
+        const mintTx = await nftContract.mint(accounts[0].address, i.toString());
         await mintTx.wait();
       }
       expect(await nftContract.balanceOf(accounts[0].address)).to.eq(maxSupply);
-      await expect(nftContract.safeMint(accounts[1].address, "16")).to.be.revertedWith(
-        "Max NFT supply has been reached."
-      );
+      await expect(nftContract.mint(accounts[1].address, "16")).to.be.revertedWith("Max NFT supply has been reached.");
     });
 
     it("Should assign the correct token id to address", async () => {
       for (let i = 1; i <= 3; i++) {
-        const mintTx = await nftContract.safeMint(ethers.Wallet.createRandom().address, i.toString());
+        const mintTx = await nftContract.mint(ethers.Wallet.createRandom().address, i.toString());
         await mintTx.wait();
       }
-      const mintTx = await nftContract.safeMint(accounts[0].address, "4");
+      const mintTx = await nftContract.mint(accounts[0].address, "4");
       await mintTx.wait();
       await expect(await nftContract.ownerOf(4)).to.eq(accounts[0].address);
     });
 
     it("Should be called by the MINTER_ROLE only", async () => {
-      await expect(nftContract.connect(accounts[1]).safeMint(accounts[1].address, "http://www.example.com/1.json")).to
-        .be.reverted;
+      await expect(nftContract.connect(accounts[1]).mint(accounts[1].address, "http://www.example.com/1.json")).to.be
+        .reverted;
     });
   });
 
   describe("Transfer", async () => {
     it("Should revert if the recipient already has one NFT", async () => {
       for (let i = 0; i < 2; i++) {
-        const mintTx = await nftContract.safeMint(accounts[0].address, `http://www.example.com/${i}.json`);
+        const mintTx = await nftContract.mint(accounts[0].address, `http://www.example.com/${i}.json`);
         await mintTx.wait();
       }
 
@@ -71,7 +82,7 @@ describe("NFT", async () => {
 
   describe("Royalties", async () => {
     beforeEach(async () => {
-      const mintTx = await nftContract.safeMint(accounts[0].address, "http://www.example.com/1.json");
+      const mintTx = await nftContract.mint(accounts[0].address, "http://www.example.com/1.json");
       await mintTx.wait();
     });
     it("Should be able to set a new receiver address", async () => {
@@ -106,36 +117,26 @@ describe("NFT", async () => {
   });
   describe("Token URI", async () => {
     it("Should set the Token URI correctly", async () => {
-      const mintTx = await nftContract.safeMint(accounts[1].address, "14");
+      const mintTx = await nftContract.mint(accounts[1].address, "1");
       await mintTx.wait();
-      const tokenURI = await nftContract.tokenURI(BigNumber.from("14"));
-      expect(tokenURI).to.eq("https://www.example.com/14.json");
+      const tokenURI = await nftContract.tokenURI(BigNumber.from("1"));
+      expect(tokenURI).to.eq("https://www.example.com/1.json");
     });
     it("Should revert if an invalid token URI parameter is provided", async () => {
-      await expect(nftContract.tokenURI("101")).to.be.revertedWith("TokenId is out of supply range.");
+      await expect(nftContract.tokenURI("101")).to.be.revertedWith("Invalid token id");
     });
     it("Should change the base URI correctly", async () => {
       const setTokenURITx = await nftContract.setBaseURI("https://www.amplifrens.xyz/");
       await setTokenURITx.wait();
-      const mintTx = await nftContract.safeMint(accounts[1].address, "13");
+      const mintTx = await nftContract.mint(accounts[1].address, "1");
       await mintTx.wait();
-      const tokenURI = await nftContract.tokenURI(BigNumber.from("13"));
-      expect(tokenURI).to.eq("https://www.amplifrens.xyz/13.json");
-    });
-  });
-  describe("Base URI", async () => {
-    it("Should return an empty string if it's not set", async () => {
-      expect(await nftMockContract.parentBaseURI()).to.be.eq("");
-    });
-    it("Should not return an empty string when it is set", async () => {
-      const baseURITx = await nftMockContract.setBaseURI("https://www.new.com/");
-      await baseURITx.wait();
-      expect(await nftMockContract.parentBaseURI()).to.be.eq("https://www.new.com/");
+      const tokenURI = await nftContract.tokenURI(BigNumber.from("1"));
+      expect(tokenURI).to.eq("https://www.amplifrens.xyz/1.json");
     });
   });
   describe("Burning", async () => {
     it("Should revert as the burn functionality is not implemented", async () => {
-      await expect(nftMockContract.burn(1)).to.be.revertedWith("Burn functionality is not implemented.");
+      await expect(nftMockContract.burn(1)).to.be.revertedWith("Not implemented.");
     });
   });
 });
