@@ -10,10 +10,9 @@ import {DataTypes} from "../libraries/types/DataTypes.sol";
  * @notice Handles the day to day operations for interacting with contributions
  */
 interface IAmpliFrensContribution {
-
     /**
      * @notice Event emitted when a contribution user's status changes
-     * 
+     *
      * @param _address The user's address
      * @param status The new status
      */
