@@ -14,8 +14,8 @@ library SBTLogic {
     using Counters for Counters.Counter;
 
     /// @dev See `IAmpliFrensSBT` for descriptions
-    event Minted(address owner, uint256 tokenId);
-    event Revoked(address owner, uint256 tokenId);
+    event Minted(address indexed owner, uint256 indexed tokenId);
+    event Revoked(address indexed owner, uint256 indexed tokenId);
 
     /**
      * @dev Check if the token index requested has been minted

@@ -16,12 +16,12 @@ interface IAmpliFrensSBT {
     /**
      *  @notice Event emitted when a token `tokenId` is minted for `owner`
      */
-    event Minted(address owner, uint256 tokenId);
+    event Minted(address indexed owner, uint256 indexed tokenId);
 
     /**
      *  @notice Event emitted when token `tokenId` of `owner` is revoked
      */
-    event Revoked(address owner, uint256 tokenId);
+    event Revoked(address indexed owner, uint256 indexed tokenId);
 
     /**
      * @notice Mints the Soulbound Token to recipient `DataTypes.Contribution.author`
@@ -113,6 +113,13 @@ interface IAmpliFrensSBT {
      * @return URI for the token
      */
     function tokenURI(uint256 tokenId) external view returns (string memory);
+
+    /**
+     * @notice Get the contribution status for address `_address`
+     *
+     * @param _address The address to retrieve contribution status
+     */
+    function getStatus(address _address) external view returns (DataTypes.FrenStatus);
 
     /**
      * @dev Return true if this contract implements the interface defined by

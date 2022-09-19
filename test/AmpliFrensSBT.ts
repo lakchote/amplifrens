@@ -27,12 +27,14 @@ describe("Soulbound Token", async () => {
     const sbtLogicLib = await (await (await ethers.getContractFactory("SBTLogic")).deploy()).deployed();
     const tokenURIHelperLib = await (await (await ethers.getContractFactory("TokenURI")).deploy()).deployed();
     const pseudoModifierLib = await (await (await ethers.getContractFactory("PseudoModifier")).deploy()).deployed();
+    const statusLib = await (await (await ethers.getContractFactory("Status")).deploy()).deployed();
 
     const sbtContractFactory = await ethers.getContractFactory("AmpliFrensSBT", {
       libraries: {
         SBTLogic: sbtLogicLib.address,
         TokenURI: tokenURIHelperLib.address,
         PseudoModifier: pseudoModifierLib.address,
+        Status: statusLib.address,
       },
     });
     accounts = await ethers.getSigners();
@@ -284,6 +286,80 @@ describe("Soulbound Token", async () => {
       expect(tokenURI).to.eq("https://www.amplifrens.xyz/1.json");
     });
   });
+
+  describe("Status", async () => {
+    it("Should get the correct status if the address has no tokens", async () => {
+      expect(await sbtContract.getStatus(accounts[2].address)).to.eq(0);
+    });
+    it("Should get the correct status if the address has earnt 1 token", async () => {
+      expect(await sbtContract.getStatus(accounts[1].address)).to.eq(1);
+    });
+    it("Should get the correct status if the address has earnt 5 tokens", async () => {
+      for (let i = 0; i <= 4; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint({
+          author: accounts[2].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          title: title,
+          url: url,
+        });
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[2].address)).to.eq(2);
+    });
+    it("Should get the correct status if the address has earnt 13 tokens", async () => {
+      for (let i = 0; i <= 12; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint({
+          author: accounts[2].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          title: title,
+          url: url,
+        });
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[2].address)).to.eq(3);
+    });
+    it("Should get the correct status if the address has earnt 21 tokens", async () => {
+      for (let i = 0; i <= 20; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint({
+          author: accounts[2].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          title: title,
+          url: url,
+        });
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[2].address)).to.eq(4);
+    });
+    it("Should get the correct status if the address has earnt 34 tokens", async () => {
+      for (let i = 0; i <= 33; i++) {
+        increaseTime();
+        const mintTx = await sbtContract.mint({
+          author: accounts[2].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          title: title,
+          url: url,
+        });
+        await mintTx.wait();
+      }
+      expect(await sbtContract.getStatus(accounts[2].address)).to.eq(5);
+    });
+  });
+
   describe("Events", async () => {
     it("Should emit a Minted event when a token is minted", async () => {
       increaseTime();
@@ -308,7 +384,7 @@ describe("Soulbound Token", async () => {
   });
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensSBT", async () => {
-      expect(await sbtContract.supportsInterface("0x8b333050")).to.be.true;
+      expect(await sbtContract.supportsInterface("0xbbffdbe5")).to.be.true;
     });
   });
 });
