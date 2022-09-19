@@ -8,6 +8,7 @@ import {PseudoModifier} from "./libraries/guards/PseudoModifier.sol";
 import {IAmpliFrensSBT} from "./interfaces/IAmpliFrensSBT.sol";
 import {DataTypes} from "./libraries/types/DataTypes.sol";
 import {TokenURI} from "./libraries/helpers/TokenURI.sol";
+import {Status} from "./libraries/helpers/Status.sol";
 
 /**
  * @title AmpliFrensSBT
@@ -134,6 +135,11 @@ contract AmpliFrensSBT is IAmpliFrensSBT {
     function revoke(uint256 tokenId) external {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
         SBTLogic.revoke(tokenId, _tokens, _validTokensForAddress, _tokenIdCounter);
+    }
+
+    /// @inheritdoc IAmpliFrensSBT
+    function getStatus(address _address) external view returns (DataTypes.FrenStatus) {
+        return Status.getStatus(_validTokensForAddress[_address]);
     }
 
     /**
