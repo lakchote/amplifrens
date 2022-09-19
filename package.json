@@ -11,6 +11,7 @@
     "test": "hardhat test",
     "clean": "hardhat clean",
     "coverage": "hardhat coverage",
+    "lint": "solhint contracts/**/*.sol",
     "deploy-nft-mumbai": "yarn ts-node scripts/deployNft.ts maticmum true",
     "deploy-nft-polygon": "yarn ts-node scripts/deployNft.ts matic true",
     "deploy-sbt-mumbai": "yarn hardhat run scripts/deploySbt.ts --network mumbai",
@@ -49,11 +50,6 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
     "typescript": "^4.7.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern 'contracts/**/*.sol' --pattern 'test/**/*.ts' --pattern 'tasks/**/*.ts'"
-    }
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
