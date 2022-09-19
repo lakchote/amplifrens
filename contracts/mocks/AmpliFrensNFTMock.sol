@@ -6,11 +6,13 @@ import "../AmpliFrensNFT.sol";
 /// @notice This is a contract to test specific AmpliFrensNFT functions
 /// @dev Enables internal functions testing
 contract AmpliFrensNFTMock is AmpliFrensNFT {
-    function burn(uint256 _tokenId) public pure {
-        _burn(_tokenId);
+    address public immutable newProxy;
+
+    constructor(address _newProxy) AmpliFrensNFT(_newProxy) {
+        newProxy = _newProxy;
     }
 
-    function parentBaseURI() public view returns (string memory) {
-        return _baseURI();
+    function burn(uint256 _tokenId) public pure {
+        _burn(_tokenId);
     }
 }

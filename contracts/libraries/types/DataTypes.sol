@@ -37,11 +37,11 @@ library DataTypes {
      *  4 storage slots used (string takes up 64 bytes or 2 slots in the storage)
      */
     struct Contribution {
-        address owner; /// @dev 20 bytes
+        address author; /// @dev 20 bytes
         ContributionCategory category; /// @dev 1 byte
         bool valid; /// @dev 1 byte
-        uint40 timestamp; /// @dev 5 bytes
-        uint40 votes; /// @dev 5 bytes
+        uint64 timestamp; /// @dev 8 bytes
+        uint16 votes; /// @dev 2 bytes
         bytes32 title; /// @dev 32 bytes
         string url; /// @dev 64 bytes
     }
@@ -54,5 +54,12 @@ library DataTypes {
         bytes32 username;
         bytes32 email;
         string websiteUrl;
+        bool valid;
+    }
+
+    /// @dev These time-related variables are used in conjunction to determine when minting function can be called
+    struct MintingInterval {
+        uint256 lastBlockTimestamp;
+        uint256 mintInterval;
     }
 }

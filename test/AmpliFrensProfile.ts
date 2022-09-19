@@ -19,120 +19,141 @@ describe("Profiles", async () => {
   beforeEach(async () => {
     accounts = await ethers.getSigners();
 
-    const profileContractFactory = (await ethers.getContractFactory("AmpliFrensProfile")) as AmpliFrensProfile__factory;
-    profileContract = await profileContractFactory.deploy();
+    const profileLogicLib = await (await (await ethers.getContractFactory("ProfileLogic")).deploy()).deployed();
+    const pseudoModifierLib = await (await (await ethers.getContractFactory("PseudoModifier")).deploy()).deployed();
+
+    const profileContractFactory = (await ethers.getContractFactory("AmpliFrensProfile", {
+      libraries: {
+        ProfileLogic: profileLogicLib.address,
+        PseudoModifier: pseudoModifierLib.address,
+      },
+    })) as AmpliFrensProfile__factory;
+
+    // Should be the facade's address, test for this access control use case is in AmpliFrensFacade.ts
+    profileContract = await profileContractFactory.deploy(accounts[0].address);
     await profileContract.deployed();
 
-    const createProfileTx = await profileContract.createProfile(
-      accounts[0].address,
-      username,
-      lensHandle,
-      discordHandle,
-      twitterHandle,
-      email,
-      websiteUrl
-    );
+    const createProfileTx = await profileContract.createProfile(accounts[0].address, {
+      username: username,
+      lensHandle: lensHandle,
+      discordHandle: discordHandle,
+      twitterHandle: twitterHandle,
+      email: email,
+      websiteUrl: websiteUrl,
+      valid: true,
+    });
     await createProfileTx.wait();
   });
 
   describe("Creation", async () => {
     it("Should update the profiles count correctly", async () => {
       expect(await profileContract.profilesCount()).to.be.eq(1);
-      const createProfileTx = await profileContract.createProfile(
-        accounts[1].address,
-        ethers.utils.formatBytes32String("afren.lens"),
-        ethers.utils.formatBytes32String("Luc#1337"),
-        ethers.utils.formatBytes32String("d3legateCall"),
-        ethers.utils.formatBytes32String("abcde"),
-        ethers.utils.formatBytes32String("foo@bar.xyz"),
-        websiteUrl
-      );
+      const createProfileTx = await profileContract.createProfile(accounts[1].address, {
+        username: ethers.utils.formatBytes32String("abc"),
+        lensHandle: ethers.utils.formatBytes32String("abc.lens"),
+        discordHandle: ethers.utils.formatBytes32String("abc#1234"),
+        twitterHandle: ethers.utils.formatBytes32String("abc"),
+        email: ethers.utils.formatBytes32String("test@test.com"),
+        websiteUrl: websiteUrl,
+        valid: true,
+      });
       await createProfileTx.wait();
       expect(await profileContract.profilesCount()).to.eq(2);
     });
     it("Should update the profiles addresses", async () => {
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(true);
     });
+    it("Should throw an error if username is empty", async () => {
+      await expect(
+        profileContract.createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String(""),
+          lensHandle: lensHandle,
+          discordHandle: discordHandle,
+          twitterHandle: twitterHandle,
+          email: email,
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
+      ).to.be.revertedWith("Empty username");
+    });
     it("Should throw an error if the username chosen already exists", async () => {
       await expect(
-        profileContract.createProfile(
-          accounts[1].address,
-          username,
-          lensHandle,
-          discordHandle,
-          twitterHandle,
-          email,
-          websiteUrl
-        )
+        profileContract.createProfile(accounts[1].address, {
+          username: username,
+          lensHandle: lensHandle,
+          discordHandle: discordHandle,
+          twitterHandle: twitterHandle,
+          email: email,
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       ).to.be.revertedWith("Username exist");
     });
     it("Should throw an error if the email chosen already exists", async () => {
       await expect(
-        profileContract.createProfile(
-          accounts[1].address,
-          ethers.utils.formatBytes32String("abcde"),
-          lensHandle,
-          discordHandle,
-          twitterHandle,
-          email,
-          websiteUrl
-        )
+        profileContract.createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("abcde"),
+          lensHandle: lensHandle,
+          discordHandle: discordHandle,
+          twitterHandle: twitterHandle,
+          email: email,
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       ).to.be.revertedWith("Email exist");
     });
     it("Should throw an error if the Discord handle already exists", async () => {
       await expect(
-        profileContract.createProfile(
-          accounts[1].address,
-          ethers.utils.formatBytes32String(""),
-          lensHandle,
-          discordHandle,
-          twitterHandle,
-          ethers.utils.formatBytes32String(""),
-          websiteUrl
-        )
+        profileContract.createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("abcde"),
+          lensHandle: ethers.utils.formatBytes32String("abcd.lens"),
+          discordHandle: discordHandle,
+          twitterHandle: ethers.utils.formatBytes32String("abcde"),
+          email: ethers.utils.formatBytes32String("abcd@gmail.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       ).to.be.revertedWith("Discord ID exist");
     });
     it("Should throw an error if the Twitter handle already exists", async () => {
       await expect(
-        profileContract.createProfile(
-          accounts[1].address,
-          ethers.utils.formatBytes32String(""),
-          lensHandle,
-          ethers.utils.formatBytes32String(""),
-          twitterHandle,
-          ethers.utils.formatBytes32String(""),
-          websiteUrl
-        )
+        profileContract.createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("abcde"),
+          lensHandle: ethers.utils.formatBytes32String("abcd.lens"),
+          discordHandle: ethers.utils.formatBytes32String("abcd#1233"),
+          twitterHandle: twitterHandle,
+          email: ethers.utils.formatBytes32String("abcd@gmail.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       ).to.be.revertedWith("Twitter ID exist");
     });
     it("Should throw an error if the Lens handle already exists", async () => {
       await expect(
-        profileContract.createProfile(
-          accounts[1].address,
-          ethers.utils.formatBytes32String(""),
-          lensHandle,
-          ethers.utils.formatBytes32String("abcdeghi#1337"),
-          ethers.utils.formatBytes32String("cz_binance"),
-          ethers.utils.formatBytes32String(""),
-          websiteUrl
-        )
+        profileContract.createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("abcde"),
+          lensHandle: lensHandle,
+          discordHandle: ethers.utils.formatBytes32String("abcde#1234"),
+          twitterHandle: ethers.utils.formatBytes32String("abcde"),
+          email: ethers.utils.formatBytes32String("abcd@gmail.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       ).to.be.revertedWith("Lens ID exist");
     });
 
     it("Should throw an error if the user is not an admin", async () => {
       await expect(
-        profileContract
-          .connect(accounts[1])
-          .createProfile(
-            accounts[1].address,
-            ethers.utils.formatBytes32String("abcde"),
-            lensHandle,
-            discordHandle,
-            twitterHandle,
-            email,
-            websiteUrl
-          )
-      ).to.be.reverted;
+        profileContract.connect(accounts[1]).createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("abcde"),
+          lensHandle: ethers.utils.formatBytes32String("abcd.lens"),
+          discordHandle: discordHandle,
+          twitterHandle: ethers.utils.formatBytes32String("abcde"),
+          email: ethers.utils.formatBytes32String("abcd@gmail.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
+      ).to.be.revertedWith("Unauthorized");
     });
   });
 
@@ -154,25 +175,23 @@ describe("Profiles", async () => {
     });
     it("Should throw an error if the user is not an admin", async () => {
       await expect(
-        profileContract
-          .connect(accounts[1])
-          .createProfile(
-            accounts[1].address,
-            ethers.utils.formatBytes32String("abcde"),
-            lensHandle,
-            discordHandle,
-            twitterHandle,
-            email,
-            websiteUrl
-          )
-      ).to.be.reverted;
+        profileContract.connect(accounts[1]).createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("abcde"),
+          lensHandle: ethers.utils.formatBytes32String("abcd.lens"),
+          discordHandle: discordHandle,
+          twitterHandle: ethers.utils.formatBytes32String("abcde"),
+          email: ethers.utils.formatBytes32String("abcd@gmail.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
+      ).to.be.revertedWith("Unauthorized");
     });
   });
 
   describe("Events", async () => {
-    it("Should trigger a Blacklisted event when a user is blacklisted", async () => {
+    it("Should trigger a ProfileBlacklisted event when a user is blacklisted", async () => {
       await expect(profileContract.blacklist(accounts[0].address, ethers.utils.formatBytes32String("Spam")))
-        .to.emit(profileContract, "Blacklisted")
+        .to.emit(profileContract, "ProfileBlacklisted")
         .withArgs(
           accounts[0].address,
           ethers.utils.formatBytes32String("Spam"),
@@ -183,30 +202,30 @@ describe("Profiles", async () => {
     });
     it("Should trigger a ProfileCreated event when a user profile is created", async () => {
       await expect(
-        profileContract.createProfile(
-          accounts[1].address,
-          ethers.utils.formatBytes32String("afren.lens"),
-          ethers.utils.formatBytes32String("Luc#1337"),
-          ethers.utils.formatBytes32String("d3legateCall"),
-          ethers.utils.formatBytes32String("abcde"),
-          ethers.utils.formatBytes32String("foo@bar.xyz"),
-          websiteUrl
-        )
+        profileContract.createProfile(accounts[1].address, {
+          username: ethers.utils.formatBytes32String("ethernal"),
+          lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
+          discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
+          twitterHandle: ethers.utils.formatBytes32String("ethernal"),
+          email: ethers.utils.formatBytes32String("ethern@l.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       )
         .to.emit(profileContract, "ProfileCreated")
         .withArgs(accounts[1].address, (await ethers.provider.getBlock("latest")).timestamp);
     });
     it("Should trigger a ProfileUpdated event when a user profile is updated", async () => {
       await expect(
-        profileContract.updateProfile(
-          accounts[0].address,
-          ethers.utils.formatBytes32String("afren.lens"),
-          ethers.utils.formatBytes32String("Luc#1337"),
-          ethers.utils.formatBytes32String("d3legateCall"),
-          ethers.utils.formatBytes32String("abcde"),
-          ethers.utils.formatBytes32String("foo@bar.xyz"),
-          websiteUrl
-        )
+        profileContract.updateProfile(accounts[0].address, {
+          username: ethers.utils.formatBytes32String("ethernal"),
+          lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
+          discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
+          twitterHandle: ethers.utils.formatBytes32String("ethernal"),
+          email: ethers.utils.formatBytes32String("ethern@l.com"),
+          websiteUrl: websiteUrl,
+          valid: true,
+        })
       )
         .to.emit(profileContract, "ProfileUpdated")
         .withArgs(accounts[0].address, (await ethers.provider.getBlock("latest")).timestamp);
@@ -220,37 +239,37 @@ describe("Profiles", async () => {
 
   describe("Update", async () => {
     it("Should update the profile's data correctly", async () => {
-      const updateTx = await profileContract.updateProfile(
-        accounts[0].address,
-        ethers.utils.formatBytes32String("myNewUsername"),
-        ethers.utils.formatBytes32String("myNewUsername.lens"),
-        ethers.utils.formatBytes32String("myNewUsername#1234"),
-        ethers.utils.formatBytes32String("myNewUsernameOnCT"),
-        ethers.utils.formatBytes32String("myNewUsername@gmail.com"),
-        "https://anon.mirror.xyz"
-      );
+      const updateTx = await profileContract.updateProfile(accounts[0].address, {
+        username: ethers.utils.formatBytes32String("ethernal"),
+        lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
+        discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
+        twitterHandle: ethers.utils.formatBytes32String("ethernal"),
+        email: ethers.utils.formatBytes32String("ethern@l.com"),
+        websiteUrl: "https://anon.mirror.xyz",
+        valid: true,
+      });
       await updateTx.wait();
       const profile = await profileContract.getProfileByDiscordHandle(
-        ethers.utils.formatBytes32String("myNewUsername#1234")
+        ethers.utils.formatBytes32String("ethernal#1337")
       );
-      expect(await profile.username).to.eq(ethers.utils.formatBytes32String("myNewUsername"));
-      expect(await profile.lensHandle).to.eq(ethers.utils.formatBytes32String("myNewUsername.lens"));
-      expect(await profile.discordHandle).to.eq(ethers.utils.formatBytes32String("myNewUsername#1234"));
-      expect(await profile.twitterHandle).to.eq(ethers.utils.formatBytes32String("myNewUsernameOnCT"));
-      expect(await profile.email).to.eq(ethers.utils.formatBytes32String("myNewUsername@gmail.com"));
+      expect(await profile.username).to.eq(ethers.utils.formatBytes32String("ethernal"));
+      expect(await profile.lensHandle).to.eq(ethers.utils.formatBytes32String("ethernal.lens"));
+      expect(await profile.discordHandle).to.eq(ethers.utils.formatBytes32String("ethernal#1337"));
+      expect(await profile.twitterHandle).to.eq(ethers.utils.formatBytes32String("ethernal"));
+      expect(await profile.email).to.eq(ethers.utils.formatBytes32String("ethern@l.com"));
       expect(await profile.websiteUrl).to.eq("https://anon.mirror.xyz");
     });
     it("Should throw an error if the profile doesn't exist", async () => {
       await expect(
-        profileContract.updateProfile(
-          accounts[2].address,
-          ethers.utils.formatBytes32String("myNewUsername"),
-          ethers.utils.formatBytes32String("myNewUsername.lens"),
-          ethers.utils.formatBytes32String("myNewUsername#1234"),
-          ethers.utils.formatBytes32String("myNewUsernameOnCT"),
-          ethers.utils.formatBytes32String("myNewUsername@gmail.com"),
-          "https://anon.mirror.xyz"
-        )
+        profileContract.updateProfile(accounts[2].address, {
+          username: ethers.utils.formatBytes32String("ethernal"),
+          lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
+          discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
+          twitterHandle: ethers.utils.formatBytes32String("ethernal"),
+          email: ethers.utils.formatBytes32String("ethern@l.com"),
+          websiteUrl: "https://anon.mirror.xyz",
+          valid: true,
+        })
       ).to.be.revertedWith("No profile");
     });
 
@@ -312,6 +331,10 @@ describe("Profiles", async () => {
       expect(await profile.email).to.eq(email);
       expect(await profile.websiteUrl).to.eq(websiteUrl);
     });
+    it("Should retrieve correctly an existing user by its address", async () => {
+      const profile = await profileContract.getProfile(accounts[0].address);
+      expect(profile.username).to.eq(username);
+    });
     it("Should retrieve correctly an user by its username", async () => {
       const profile = await profileContract.getProfileByUsername(username);
       expect(await profile.username).to.eq(username);
@@ -354,7 +377,7 @@ describe("Profiles", async () => {
     });
     it("Should throw an error if the profile by Lens handle doesn't exist", async () => {
       await expect(
-        profileContract.getProfileByUsername(ethers.utils.formatBytes32String("afren.lens"))
+        profileContract.getProfileByLensHandle(ethers.utils.formatBytes32String("afren.lens"))
       ).to.be.revertedWith("No user");
     });
     it("Should throw an error if the user is not an admin", async () => {
