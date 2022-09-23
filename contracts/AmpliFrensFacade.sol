@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {IAmpliFrensContribution} from "./interfaces/IAmpliFrensContribution.sol";
 import {IAmpliFrensProfile} from "./interfaces/IAmpliFrensProfile.sol";
 import {IAmpliFrensNFT} from "./interfaces/IAmpliFrensNFT.sol";
@@ -19,7 +20,7 @@ import {DataTypes} from "./libraries/types/DataTypes.sol";
  *
  * @dev Must be covered by a proxy contract as it is upgradeable
  */
-contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUpgradeable, IAmpliFrensFacade {
+contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUpgradeable, IERC165, IAmpliFrensFacade {
     IAmpliFrensContribution internal immutable contributions;
     IAmpliFrensProfile internal immutable profiles;
     IAmpliFrensNFT internal immutable nfts;
@@ -46,108 +47,135 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function checkUpkeep(bytes calldata checkData)
-        external
-        override
-        returns (bool upkeepNeeded, bytes memory performData)
-    {}
+    function checkUpkeep(bytes calldata checkData) external returns (bool upkeepNeeded, bytes memory performData) {}
 
     /// @inheritdoc IAmpliFrensFacade
-    function performUpkeep(bytes calldata performData) external override whenNotPaused {}
+    function performUpkeep(bytes calldata performData) external whenNotPaused {}
 
-    function balanceOfSoulboundTokens(address _address) external view override returns (uint256) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function setSBTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
 
-    function ownerOfSoulboundToken(uint256 token) external view override returns (address) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function createUserProfile(DataTypes.Profile calldata profile) external whenNotPaused {}
 
-    function isValidSoulboundToken(uint256 tokenId) external view override returns (bool) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function updateUserProfile(DataTypes.Profile calldata profile) external whenNotPaused {}
 
-    function hasValidSoulboundToken(address owner) external view override returns (bool) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function deleteUserProfile(address _address) external whenNotPaused {}
 
-    function uriSoulboundTokenId(uint256 id) external override returns (string memory) {}
-
-    function totalSoulboundTokens() external view override returns (uint256) {}
-
-    function totalSoulboundHolders() external view override returns (uint256) {}
-
-    function setSBTBaseURI(string calldata uri) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(AccessControlUpgradeable, IAmpliFrensFacade)
-        returns (bool)
-    {}
-
-    function createUserProfile(DataTypes.Profile calldata profile)
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        whenNotPaused
-    {}
-
-    function getUserProfile(address _address) external override returns (DataTypes.Profile memory) {}
-
-    function updateUserProfile(DataTypes.Profile calldata profile)
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        whenNotPaused
-    {}
-
-    function deleteUserProfile(address _address) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
-
+    /// @inheritdoc IAmpliFrensFacade
     function blacklistUserProfile(address _address, bytes32 reason)
         external
-        override
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
     {
         profiles.blacklist(_address, reason);
     }
 
-    function getProfileBlacklistReason(address _address) external view override returns (bytes32) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function upvoteContribution(uint256 contributionId) external whenNotPaused {}
 
-    function hasUserProfile(address _address) external view override returns (bool) {}
-
-    function upvoteContribution(uint256 contributionId) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
-
+    /// @inheritdoc IAmpliFrensFacade
     function downvoteContribution(DataTypes.Contribution calldata contributionId)
         external
-        override
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
     {}
 
-    function reportContribution(uint256 contributionId) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    /// @inheritdoc IAmpliFrensFacade
+    function removeContribution(uint256 contributionId) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
 
-    function removeContribution(uint256 contributionId) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    /// @inheritdoc IAmpliFrensFacade
+    function updateContribution(uint256 contributionId, DataTypes.Contribution calldata contribution)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        whenNotPaused
+    {}
 
-    function updateContribution(uint256 contributionId) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
-
+    /// @inheritdoc IAmpliFrensFacade
     function createContribution(DataTypes.Contribution calldata contribution)
         external
-        override
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
     {}
 
-    function getContributions() external view override returns (DataTypes.Contribution[] memory) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function resetContributions() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
 
-    function todayBestContribution() external override returns (DataTypes.Contribution memory) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function mintNft(address to, string memory uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
 
-    function yesterdayBestContribution() external override returns (DataTypes.Contribution memory) {}
+    /// @inheritdoc IAmpliFrensFacade
+    function setNFTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
 
-    function resetContributions() external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    /// @inheritdoc IAmpliFrensFacade
+    function setNFTGlobalRoyalties(address receiver, uint96 feeNumerator) external whenNotPaused {}
 
-    function mintNft(address to, string memory uri) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
-
-    function uriNftId(uint256 id) external override returns (string memory) {}
-
-    function setNFTBaseURI(string calldata uri) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
-
-    function setGlobalNFTRoyalties(address receiver, uint96 feeNumerator) external override whenNotPaused {}
-
+    /// @inheritdoc IAmpliFrensFacade
     function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {}
 
+    /// @inheritdoc IAmpliFrensFacade
     function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function uriSBT(uint256 id) external view returns (string memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function getUserProfile(address _address) external view returns (DataTypes.Profile memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function uriNft(uint256 id) external view returns (string memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function balanceOfSBT(address _address) external view returns (uint256) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function ownerOfSBT(uint256 token) external view returns (address) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function idSBTOfOwnerByIndex(address owner, uint256 index) external view returns (uint256) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function getSBTById(uint256 id) external view returns (DataTypes.Contribution memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function isMintingIntervalMet() external view returns (bool) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function totalSBTs() external view returns (uint256) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function totalSBTHolders() external view returns (uint256) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function getProfileBlacklistReason(address _address) external view returns (bytes32) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function hasUserProfile(address _address) external view returns (bool) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function getContributions() external view returns (DataTypes.Contribution[] memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function topContribution() external view returns (DataTypes.Contribution memory) {}
+
+    /// @inheritdoc IAmpliFrensFacade
+    function totalContributions() external view returns (uint256) {}
+
+    /// @inheritdoc IERC165
+    function supportsInterface(bytes4 interfaceId)
+        public
+        pure
+        override(AccessControlUpgradeable, IERC165)
+        returns (bool)
+    {
+        return
+            type(IAmpliFrensSBT).interfaceId == interfaceId ||
+            type(IERC165).interfaceId == interfaceId ||
+            type(IAccessControlUpgradeable).interfaceId == interfaceId;
+    }
 }
