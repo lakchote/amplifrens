@@ -10,13 +10,10 @@ import {DataTypes} from "../libraries/types/DataTypes.sol";
  * @notice Handles the day to day operations for interacting with contributions
  */
 interface IAmpliFrensContribution {
-    /**
-     * @notice Event emitted when a contribution user's status changes
-     *
-     * @param _address The user's address
-     * @param status The new status
-     */
-    event UserStatusChanged(address indexed _address, DataTypes.FrenStatus indexed status);
+    /// @dev Events related to contributions interaction
+    event Upvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event Downvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event Updated(address indexed from, uint256 indexed contributionId, uint256 timestamp);
 
     /**
      * @notice Upvote the contribution with id `contributionId`
@@ -30,19 +27,12 @@ interface IAmpliFrensContribution {
      *
      * @param contributionId The contribution id to downvote
      */
-    function downvote(DataTypes.Contribution calldata contributionId) external;
-
-    /**
-     * @notice Report the contribution with id `contributionId`
-     *
-     * @param contributionId The contribution id to report
-     */
-    function report(uint256 contributionId) external;
+    function downvote(uint256 contributionId) external;
 
     /**
      * @notice Remove the contribution with id `contributionId`
      *
-     * @param contributionId The contribution id to upvote
+     * @param contributionId The contribution id to delete
      */
     function remove(uint256 contributionId) external;
 
@@ -50,8 +40,32 @@ interface IAmpliFrensContribution {
      * @notice Update the contribution with id `contributionId`
      *
      * @param contributionId The contribution id to update
+     * @param category The contribution's updated category
+     * @param title The contribution's updated title
+     * @param url The contribution's updated url
      */
-    function update(uint256 contributionId) external;
+    function update(
+        uint256 contributionId,
+        DataTypes.ContributionCategory category,
+        bytes32 title,
+        string calldata url
+    ) external;
+
+    /**
+     * @notice Create a contribution
+     *
+     * @param category The contribution's category
+     * @param title The contribution's title
+     * @param url The contribution's url
+     */
+    function create(
+        DataTypes.ContributionCategory category,
+        bytes32 title,
+        string calldata url
+    ) external;
+
+    /// @notice Reset the contributions
+    function reset() external;
 
     /**
      * @notice Get the total contributions
@@ -61,29 +75,24 @@ interface IAmpliFrensContribution {
     function getContributions() external view returns (DataTypes.Contribution[] memory);
 
     /**
-     * @notice Get contributions with user status `status`
+     * @notice Get the contribution with id `contributionId`
      *
-     * @return Total contributions with status `status` of type `DataTypes.Contribution`
+     * @param contributionId The id of the contribution to retrieve
+     * @return Contribution with id `contributionId` of type `DataTypes.Contribution`
      */
-    function getContributionsByStatus(DataTypes.FrenStatus status)
-        external
-        view
-        returns (DataTypes.Contribution[] memory);
+    function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory);
 
     /**
-     * @notice Get the present most upvoted contribution
+     * @notice Get the most upvoted contribution
      *
      * @return `DataTypes.Contribution`
      */
-    function todayBestContribution() external returns (DataTypes.Contribution memory);
+    function topContribution() external view returns (DataTypes.Contribution memory);
 
     /**
-     * @notice Get yesterday's most upvoted contribution
+     * @notice Return the total number of contributions
      *
-     * @return `DataTypes.Contribution`
+     * @return Number of contributions
      */
-    function yesterdayBestContribution() external returns (DataTypes.Contribution memory);
-
-    /// @notice Reset the contributions
-    function reset() external;
+    function contributionsCount() external view returns (uint256);
 }

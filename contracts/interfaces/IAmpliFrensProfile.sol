@@ -43,12 +43,11 @@ interface IAmpliFrensProfile {
     event ProfileDeleted(address indexed _address, uint256 timestamp);
 
     /**
-     * @notice Create a profile for address `_address`
+     * @notice Create a profile for address `msg.sender`
      *
-     * @param _address The address's profile to create
      * @param profile `DataTypes.Profile` containing the profile data
      */
-    function createProfile(address _address, DataTypes.Profile calldata profile) external;
+    function createProfile(DataTypes.Profile calldata profile) external;
 
     /**
      * @notice Get a profile if applicable for address `_address`
@@ -58,12 +57,11 @@ interface IAmpliFrensProfile {
     function getProfile(address _address) external returns (DataTypes.Profile memory);
 
     /**
-     * @notice Update a profile for address `_address`
+     * @notice Update a profile for address `msg.sender`
      *
-     * @param _address The address's profile to update
      * @param profile `DataTypes.Profile` containing the profile data
      */
-    function updateProfile(address _address, DataTypes.Profile calldata profile) external;
+    function updateProfile(DataTypes.Profile calldata profile) external;
 
     /**
      * @notice Delete the profile of address `_address`
@@ -94,34 +92,6 @@ interface IAmpliFrensProfile {
      * @return `DataTypes.Profile` containing the profile data
      */
     function getProfileByUsername(bytes32 username) external view returns (DataTypes.Profile memory);
-
-    /**
-     * @notice Get a profile by its email `email`
-     *
-     * @return `DataTypes.Profile` containing the profile data
-     */
-    function getProfileByEmail(bytes32 email) external view returns (DataTypes.Profile memory);
-
-    /**
-     * @notice Get a profile by its Twitter handle `twitterHandle`
-     *
-     * @return `DataTypes.Profile` containing the profile data
-     */
-    function getProfileByTwitterHandle(bytes32 twitterHandle) external view returns (DataTypes.Profile memory);
-
-    /**
-     * @notice Get a profile by its Discord handle `discordHandle`
-     *
-     * @return `DataTypes.Profile` containing the profile data
-     */
-    function getProfileByDiscordHandle(bytes32 discordHandle) external view returns (DataTypes.Profile memory);
-
-    /**
-     * @notice Get a profile by its Lens handle `lensHandle`
-     *
-     * @return `DataTypes.Profile` containing the profile data
-     */
-    function getProfileByLensHandle(bytes32 lensHandle) external view returns (DataTypes.Profile memory);
 
     /**
      * @notice Check if address `_address` has a profile
