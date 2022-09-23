@@ -142,11 +142,6 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
         return Status.getStatus(_validTokensForAddress[_address]);
     }
 
-    /// @inheritdoc IAmpliFrensSBT
-    function getStatus(address _address) external view returns (DataTypes.FrenStatus) {
-        return Status.getStatus(_validTokensForAddress[_address]);
-    }
-
     /**
      *  @notice Get the last block timestamp when minting occured
      * (if minting happened at least once, otherwise it is the contract's initialization timestamp)
