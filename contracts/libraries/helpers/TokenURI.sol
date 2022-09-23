@@ -14,11 +14,6 @@ library TokenURI {
     using Strings for uint256;
     using Counters for Counters.Counter;
 
-    modifier isTokenIdValid(uint256 index, Counters.Counter storage counter) {
-        require(index <= counter.current(), "Invalid token id");
-        _;
-    }
-
     /**
      * @notice Concatenate `baseURI` with the `tokenId` and ".json" string
      *
@@ -26,11 +21,11 @@ library TokenURI {
      * @param baseURI The base URI to concatenate with
      * @return A string containing `baseURI` with the `tokenId` and ".json" as URI extension
      */
-    function concatBaseURITokenIdJsonExt(
-        uint256 tokenId,
-        string calldata baseURI,
-        Counters.Counter storage _tokenIdCounter
-    ) external view isTokenIdValid(tokenId, _tokenIdCounter) returns (string memory) {
+    function concatBaseURITokenIdJsonExt(uint256 tokenId, string calldata baseURI)
+        external
+        pure
+        returns (string memory)
+    {
         return
             bytes(baseURI).length > 0
                 ? string(abi.encodePacked(baseURI, Strings.toString(tokenId), ".json"))

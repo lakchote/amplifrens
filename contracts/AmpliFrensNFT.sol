@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {IAmpliFrensNFT} from "./interfaces/IAmpliFrensNFT.sol";
 import {TokenURI} from "./libraries/helpers/TokenURI.sol";
+import {Errors} from "./libraries/helpers/Errors.sol";
 import {PseudoModifier} from "./libraries/guards/PseudoModifier.sol";
 
 /**
@@ -23,16 +24,16 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
     using Strings for uint256;
 
     Counters.Counter private _tokenIdCounter;
+
     mapping(address => bool) public ownerAddresses;
 
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public constant MAX_SUPPLY = 15;
     string public baseURI;
     address public immutable facadeProxy;
 
     /// @dev Guard to ensure supply limit is enforced
     modifier hasSupply() {
-        require(_tokenIdCounter.current() <= MAX_SUPPLY, "Max NFT supply has been reached.");
+        if (_tokenIdCounter.current() >= MAX_SUPPLY) revert Errors.MaxSupplyReached();
         _;
     }
 
@@ -42,14 +43,13 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
      * @param recipient The address to verify its NFT balance
      */
     modifier isNotAlreadyOwner(address recipient) {
-        require(!ownerAddresses[recipient], "User can only have one NFT.");
+        if (ownerAddresses[recipient]) revert Errors.AlreadyOwnNft();
         _;
     }
 
     /// @dev Constructor for contract initialization
     constructor(address _facadeProxy) ERC721("AmpliFrens", "AFREN") {
         facadeProxy = _facadeProxy;
-        _tokenIdCounter.increment(); /// @dev Set default token id as 1
     }
 
     /**
@@ -60,8 +60,8 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
      */
     function mint(address to, string memory uri) external hasSupply {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
-        uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
+        uint256 tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }
@@ -77,17 +77,19 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
 
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) external {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
-        require(receiver != address(0), "Receiver address cannot be null.");
+        if (receiver == address(0)) {
+            revert Errors.AddressNull();
+        }
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
     /// @dev Burn functionality is not allowed
     function _burn(uint256) internal pure virtual override(ERC721, ERC721Royalty, ERC721URIStorage) {
-        revert("Not implemented.");
+        revert Errors.NotImplemented();
     }
 
     /**
-     * @notice Sets the base URI `uri` for tokens, it should end with a "/"
+     * @notice Set the base URI `uri` for tokens, it should end with a "/"
      *
      * @param uri The base URI
      */
@@ -97,7 +99,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
     }
 
     /**
-     * @notice Gets the token URI for the token with id `tokenId`
+     * @notice Get the token URI for the token with id `tokenId`
      *
      * @param tokenId The token id to retrieve the URI
      */
@@ -107,7 +109,8 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         override(ERC721, ERC721URIStorage, IERC721Metadata)
         returns (string memory uri)
     {
-        uri = TokenURI.concatBaseURITokenIdJsonExt(tokenId, baseURI, _tokenIdCounter);
+        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
+        uri = TokenURI.concatBaseURITokenIdJsonExt(tokenId, baseURI);
     }
 
     /// @inheritdoc IERC165

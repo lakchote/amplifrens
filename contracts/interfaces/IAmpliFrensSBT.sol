@@ -16,12 +16,12 @@ interface IAmpliFrensSBT {
     /**
      *  @notice Event emitted when a token `tokenId` is minted for `owner`
      */
-    event Minted(address indexed owner, uint256 indexed tokenId);
+    event Minted(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
 
     /**
      *  @notice Event emitted when token `tokenId` of `owner` is revoked
      */
-    event Revoked(address indexed owner, uint256 indexed tokenId);
+    event Revoked(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
 
     /**
      * @notice Mints the Soulbound Token to recipient `DataTypes.Contribution.author`
@@ -38,15 +38,7 @@ interface IAmpliFrensSBT {
     function revoke(uint256 tokenId) external;
 
     /**
-     * @notice Get the total tokens for address `_address`
-     *
-     * @param _address The address to get tokens length
-     * @return Number of tokens for address `_address`
-     */
-    function totalTokensForAddress(address _address) external view returns (uint256);
-
-    /**
-     * @notice Count all tokens assigned to an owner
+     * @notice Count all valid tokens assigned to an owner
      *
      * @param owner Address for whom to query the balance
      * @return Number of tokens owned by `owner`
@@ -54,7 +46,14 @@ interface IAmpliFrensSBT {
     function balanceOf(address owner) external view returns (uint256);
 
     /**
-     * @notice Get owner of a token
+     * @notice Check if minting interval has been met
+     *
+     * @return True or false
+     */
+    function isMintingIntervalMet() external view returns (bool);
+
+    /**
+     * @notice Get the owner of the token with id `tokenId`
      *
      * @param tokenId Identifier of the token
      * @return Address of the owner of `tokenId`
@@ -62,7 +61,7 @@ interface IAmpliFrensSBT {
     function ownerOf(uint256 tokenId) external view returns (address);
 
     /**
-     * @notice Check if a token hasn't been revoked
+     * @notice Check if the token with id `tokenId` hasn't been revoked
      *
      * @param tokenId Identifier of the token
      * @return True if the token is valid, false otherwise
@@ -84,13 +83,21 @@ interface IAmpliFrensSBT {
     function holdersCount() external view returns (uint256);
 
     /**
-     * @notice Get the tokenId of a token using its position in the owner's list
+     * @notice Get the id of a token using its position in the owner's list
      *
      * @param owner Address for whom to get the token
      * @param index Index of the token
      * @return tokenId of the token
      */
     function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256);
+
+    /**
+     * @notice Get the contribution associated with token of id `id`
+     *
+     * @param id The token id
+     * @return Contribution of type `DataTypes.Contribution`
+     */
+    function tokenById(uint256 id) external view returns (DataTypes.Contribution memory);
 
     /**
      * @notice Get a tokenId by it's index, where 0 <= index < total()
@@ -120,14 +127,4 @@ interface IAmpliFrensSBT {
      * @param _address The address to retrieve contribution status
      */
     function getStatus(address _address) external view returns (DataTypes.FrenStatus);
-
-    /**
-     * @dev Return true if this contract implements the interface defined by
-     * `interfaceId`. See the corresponding
-     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]
-     * to learn more about how these ids are created.
-     *
-     * This function call must use less than 30 000 gas.
-     */
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }

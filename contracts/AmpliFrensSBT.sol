@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {SBTLogic} from "./libraries/logic/SBTLogic.sol";
 import {PseudoModifier} from "./libraries/guards/PseudoModifier.sol";
 import {IAmpliFrensSBT} from "./interfaces/IAmpliFrensSBT.sol";
@@ -19,7 +20,7 @@ import {Status} from "./libraries/helpers/Status.sol";
  * @custom:security-contact lakchote@icloud.com
  * @custom:oz-upgrades-unsafe-allow external-library-linking
  */
-contract AmpliFrensSBT is IAmpliFrensSBT {
+contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
@@ -28,29 +29,24 @@ contract AmpliFrensSBT is IAmpliFrensSBT {
 
     /// @dev Number of tokens emitted
     Counters.Counter private _tokenIdCounter;
-
     /// @dev Number of unique holders of the token
     Counters.Counter private _holdersCount;
 
     /// @dev Maps token ids with the most upvoted contributions
     mapping(uint256 => DataTypes.Contribution) private _tokens;
-
     /// @dev Maps an EOA address with its contributions tokens
     mapping(address => uint256[]) private _tokensForAddress;
-
     /// @dev Counter for valid tokens for addresses
     mapping(address => uint256) private _validTokensForAddress;
 
     /// @dev Base Token URI for metadata
     string public baseURI;
-
     string public constant SBT_TOKEN_NAME = "AmpliFrens Contribution Award";
-
     string public constant SBT_TOKEN_SYMBOL = "AFRENCONTRIBUTION";
 
     address public immutable facadeProxy;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
+    /// @dev Contract initialization with facade's proxy address precomputed
     constructor(address _facadeProxy) {
         mintingParams.lastBlockTimestamp = block.timestamp;
         mintingParams.mintInterval = 1 days;
@@ -72,8 +68,25 @@ contract AmpliFrensSBT is IAmpliFrensSBT {
     }
 
     /// @inheritdoc IAmpliFrensSBT
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return type(IAmpliFrensSBT).interfaceId == interfaceId;
+    function revoke(uint256 tokenId) external {
+        PseudoModifier.addressEq(facadeProxy, msg.sender);
+        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
+        SBTLogic.revoke(tokenId, _tokens, _validTokensForAddress);
+    }
+
+    /**
+     * @notice Sets the base URI `uri` for tokens, it should end with a "/"
+     *
+     * @param uri The base URI
+     */
+    function setBaseURI(string calldata uri) external {
+        PseudoModifier.addressEq(facadeProxy, msg.sender);
+        baseURI = uri;
+    }
+
+    /// @inheritdoc IAmpliFrensSBT
+    function isMintingIntervalMet() external view returns (bool) {
+        return SBTLogic.isMintingIntervalMet(mintingParams.lastBlockTimestamp, mintingParams.mintInterval);
     }
 
     /// @inheritdoc IAmpliFrensSBT
@@ -83,27 +96,21 @@ contract AmpliFrensSBT is IAmpliFrensSBT {
 
     /// @inheritdoc IAmpliFrensSBT
     function ownerOf(uint256 tokenId) external view returns (address owner) {
-        return _tokens[tokenId].author;
+        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
+
+        return SBTLogic.ownerOf(tokenId, _tokens);
     }
 
     /// @inheritdoc IAmpliFrensSBT
     function isValid(uint256 tokenId) external view returns (bool) {
-        return _tokens[tokenId].valid;
+        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
+
+        return SBTLogic.isValid(tokenId, _tokens);
     }
 
     /// @inheritdoc IAmpliFrensSBT
     function hasValid(address owner) external view returns (bool) {
         return _validTokensForAddress[owner] > 0;
-    }
-
-    /// @inheritdoc IAmpliFrensSBT
-    function name() external pure returns (string memory) {
-        return SBT_TOKEN_NAME;
-    }
-
-    /// @inheritdoc IAmpliFrensSBT
-    function symbol() external pure returns (string memory) {
-        return SBT_TOKEN_SYMBOL;
     }
 
     /// @inheritdoc IAmpliFrensSBT
@@ -117,24 +124,17 @@ contract AmpliFrensSBT is IAmpliFrensSBT {
     }
 
     /// @inheritdoc IAmpliFrensSBT
-    function totalTokensForAddress(address _address) external view returns (uint256) {
-        return _validTokensForAddress[_address];
-    }
-
-    /// @inheritdoc IAmpliFrensSBT
     function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256) {
+        PseudoModifier.isNotOutOfBounds(index, _tokenIdCounter);
+
         return SBTLogic.tokenOfOwnerByIndex(owner, index, _tokensForAddress);
     }
 
     /// @inheritdoc IAmpliFrensSBT
-    function tokenByIndex(uint256 index) external pure returns (uint256) {
-        return index; /// @dev index == tokenId
-    }
+    function tokenById(uint256 id) external view returns (DataTypes.Contribution memory) {
+        PseudoModifier.isNotOutOfBounds(id, _tokenIdCounter);
 
-    /// @inheritdoc IAmpliFrensSBT
-    function revoke(uint256 tokenId) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
-        SBTLogic.revoke(tokenId, _tokens, _validTokensForAddress, _tokenIdCounter);
+        return SBTLogic.tokenById(id, _tokens);
     }
 
     /// @inheritdoc IAmpliFrensSBT
@@ -151,21 +151,33 @@ contract AmpliFrensSBT is IAmpliFrensSBT {
     }
 
     /**
-     * @notice Sets the base URI `uri` for tokens, it should end with a "/"
-     *
-     * @param uri The base URI
-     */
-    function setBaseURI(string calldata uri) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
-        baseURI = uri;
-    }
-
-    /**
      * @notice Gets the token URI for token with id `tokenId`
      *
      * @param tokenId The token id to retrieve the URI
      */
     function tokenURI(uint256 tokenId) external view returns (string memory uri) {
-        uri = TokenURI.concatBaseURITokenIdJsonExt(tokenId, baseURI, _tokenIdCounter);
+        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
+
+        uri = TokenURI.concatBaseURITokenIdJsonExt(tokenId, baseURI);
+    }
+
+    /// @inheritdoc IAmpliFrensSBT
+    function name() external pure returns (string memory) {
+        return SBT_TOKEN_NAME;
+    }
+
+    /// @inheritdoc IAmpliFrensSBT
+    function symbol() external pure returns (string memory) {
+        return SBT_TOKEN_SYMBOL;
+    }
+
+    /// @inheritdoc IAmpliFrensSBT
+    function tokenByIndex(uint256 index) external pure returns (uint256) {
+        return index; /// @dev index == tokenId
+    }
+
+    /// @inheritdoc IERC165
+    function supportsInterface(bytes4 interfaceId) external pure override(IERC165) returns (bool) {
+        return type(IAmpliFrensSBT).interfaceId == interfaceId || type(IERC165).interfaceId == interfaceId;
     }
 }

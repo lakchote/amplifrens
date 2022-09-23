@@ -13,3 +13,6 @@ gas_report*.txt
 
 # OpenZeppelin Upgrades (dev)
 .openzeppelin/unknown-*.json
+
+# Mac specific
+.DS_STORE
