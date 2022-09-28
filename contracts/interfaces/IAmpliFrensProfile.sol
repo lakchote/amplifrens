@@ -50,13 +50,6 @@ interface IAmpliFrensProfile {
     function createProfile(DataTypes.Profile calldata profile) external;
 
     /**
-     * @notice Get a profile if applicable for address `_address`
-     *
-     * @return `DataTypes.Profile` data
-     */
-    function getProfile(address _address) external returns (DataTypes.Profile memory);
-
-    /**
      * @notice Update a profile for address `msg.sender`
      *
      * @param profile `DataTypes.Profile` containing the profile data
@@ -69,6 +62,13 @@ interface IAmpliFrensProfile {
      * @param _address The address's profile to delete
      */
     function deleteProfile(address _address) external;
+
+    /**
+     * @notice Get a profile if applicable for address `_address`
+     *
+     * @return `DataTypes.Profile` data
+     */
+    function getProfile(address _address) external view returns (DataTypes.Profile memory);
 
     /**
      * @notice Blacklist a profile with address `_address` for reason `reason`

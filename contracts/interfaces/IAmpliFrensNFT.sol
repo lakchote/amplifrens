@@ -42,4 +42,11 @@ interface IAmpliFrensNFT is IERC721, IERC721Metadata {
      * @param feeNumerator The royalty fee
      */
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) external;
+
+    /**
+     * @notice Set the base URI `uri` for tokens, it should end with a "/"
+     *
+     * @param uri The base URI
+     */
+    function setBaseURI(string calldata uri) external;
 }

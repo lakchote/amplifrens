@@ -88,11 +88,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         revert Errors.NotImplemented();
     }
 
-    /**
-     * @notice Set the base URI `uri` for tokens, it should end with a "/"
-     *
-     * @param uri The base URI
-     */
+    /// @inheritdoc IAmpliFrensNFT
     function setBaseURI(string calldata uri) external {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
         baseURI = uri;

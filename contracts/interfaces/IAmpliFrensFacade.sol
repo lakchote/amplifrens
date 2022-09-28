@@ -19,15 +19,19 @@ interface IAmpliFrensFacade {
      *  for the contribution of the day needs to be done
      *
      *  @dev Used by Chainlink Keeper to know if keeper needs to be triggered
+     *
+     *  @param checkData bytes that will be used as input parameter
      */
     function checkUpkeep(bytes calldata checkData) external returns (bool upkeepNeeded, bytes memory performData);
 
     /**
-     *  @notice Perform the automated minting of soulbound tokens
-     *  for the contribution of the day
+     * @notice Perform the automated minting of soulbound tokens
+     * for the contribution of the day
      *
-     *  @dev Used by Chainlink Keeper to perform cron logic
-     *  (in our case: automated minting of soulbound tokens)
+     * @dev Used by Chainlink Keeper to perform cron logic
+     * (in our case: automated minting of soulbound tokens)
+     *
+     * @param performData bytes that will be used as input parameter
      */
     function performUpkeep(bytes calldata performData) external;
 
@@ -55,13 +59,6 @@ interface IAmpliFrensFacade {
 
     /// @return holdersCount Number of token holders
     function totalSBTHolders() external view returns (uint256);
-
-    /**
-     * @notice Check if minting interval has been met
-     *
-     * @return True or false
-     */
-    function isMintingIntervalMet() external view returns (bool);
 
     /**
      * @notice Get the URI of Soulbound token with id `id`
@@ -168,7 +165,7 @@ interface IAmpliFrensFacade {
      *
      * @param contributionId The contribution id to downvote
      */
-    function downvoteContribution(DataTypes.Contribution calldata contributionId) external;
+    function downvoteContribution(uint256 contributionId) external;
 
     /**
      * @notice Post the contribution with id `contributionId`
@@ -234,7 +231,7 @@ interface IAmpliFrensFacade {
      * @param to The address to mint the NFT
      * @param uri The URI of the NFT
      */
-    function mintNft(address to, string memory uri) external;
+    function mintNFT(address to, string memory uri) external;
 
     /**
      * @notice Set the NFT base URI
