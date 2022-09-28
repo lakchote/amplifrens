@@ -10,19 +10,20 @@ async function increaseTime() {
   await network.provider.send("evm_increaseTime", [1000 * 60 * 60 * 24]);
   await network.provider.send("evm_mine");
 }
+
+let sbtContract: AmpliFrensSBT;
+let accounts: SignerWithAddress[];
+let timestampDeployment: Number;
+let errorsLib: Errors;
+
+// The following consts will be used for default minting params
+const title = ethers.utils.formatBytes32String("Gud alpha , get latest WLs here");
+const contributionCategory = 7; // Misc category
+const timestamp = Math.floor(Date.now() / 1000); // convert timestamp to seconds
+const votes = 140;
+const url = "https://www.twitter.com/profile/alphaMaker";
+
 describe("Soulbound Token", async () => {
-  let sbtContract: AmpliFrensSBT;
-  let accounts: SignerWithAddress[];
-  let timestampDeployment: Number;
-  let errorsLib: Errors;
-
-  // The following consts will be used for default minting params
-  const title = ethers.utils.formatBytes32String("Gud alpha , get latest WLs here");
-  const contributionCategory = 7; // Misc category
-  const timestamp = Math.floor(Date.now() / 1000); // convert timestamp to seconds
-  const votes = 140;
-  const url = "https://www.twitter.com/profile/alphaMaker";
-
   beforeEach(async () => {
     const sbtLogicLib = await (await (await ethers.getContractFactory("SBTLogic")).deploy()).deployed();
     const tokenURIHelperLib = await (await (await ethers.getContractFactory("TokenURI")).deploy()).deployed();
@@ -430,7 +431,7 @@ describe("Soulbound Token", async () => {
   });
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensSBT", async () => {
-      expect(await sbtContract.supportsInterface("0xcaa7a328")).to.be.true;
+      expect(await sbtContract.supportsInterface("0x9f5fa79b")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

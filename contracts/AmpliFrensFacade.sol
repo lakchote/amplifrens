@@ -21,48 +21,59 @@ import {DataTypes} from "./libraries/types/DataTypes.sol";
  * @dev Must be covered by a proxy contract as it is upgradeable
  */
 contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUpgradeable, IERC165, IAmpliFrensFacade {
-    IAmpliFrensContribution internal immutable contributions;
-    IAmpliFrensProfile internal immutable profiles;
-    IAmpliFrensNFT internal immutable nfts;
-    IAmpliFrensSBT internal immutable sbts;
+    IAmpliFrensContribution internal immutable _contribution;
+    IAmpliFrensProfile internal immutable _profile;
+    IAmpliFrensNFT internal immutable _nft;
+    IAmpliFrensSBT internal immutable _sbt;
 
     constructor(
-        IAmpliFrensContribution _contributions,
-        IAmpliFrensProfile _profiles,
-        IAmpliFrensNFT _nfts,
-        IAmpliFrensSBT _sbts
+        IAmpliFrensContribution contribution,
+        IAmpliFrensProfile profile,
+        IAmpliFrensNFT nft,
+        IAmpliFrensSBT sbt
     ) {
-        contributions = _contributions;
-        profiles = _profiles;
-        nfts = _nfts;
-        sbts = _sbts;
-        _disableInitializers();
+        _contribution = contribution;
+        _profile = profile;
+        _nft = nft;
+        _sbt = sbt;
     }
 
-    function initialize() public initializer {
+    function initialize(address adminAddress) public initializer {
         __Pausable_init();
         __AccessControl_init();
 
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, adminAddress);
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function checkUpkeep(bytes calldata checkData) external returns (bool upkeepNeeded, bytes memory performData) {}
+    function checkUpkeep(bytes calldata) external view returns (bool upkeepNeeded, bytes memory) {
+        return (_sbt.isMintingIntervalMet(), "");
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function performUpkeep(bytes calldata performData) external whenNotPaused {}
+    function performUpkeep(bytes calldata) external whenNotPaused {
+        _sbt.mint(_contribution.topContribution());
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function setSBTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    function setSBTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        _sbt.setBaseURI(uri);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function createUserProfile(DataTypes.Profile calldata profile) external whenNotPaused {}
+    function createUserProfile(DataTypes.Profile calldata profile) external whenNotPaused {
+        _profile.createProfile(profile);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function updateUserProfile(DataTypes.Profile calldata profile) external whenNotPaused {}
+    function updateUserProfile(DataTypes.Profile calldata profile) external whenNotPaused {
+        _profile.updateProfile(profile);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function deleteUserProfile(address _address) external whenNotPaused {}
+    function deleteUserProfile(address _address) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) {
+        _profile.deleteProfile(_address);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
     function blacklistUserProfile(address _address, bytes32 reason)
@@ -70,101 +81,145 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
     {
-        profiles.blacklist(_address, reason);
+        _profile.blacklist(_address, reason);
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function upvoteContribution(uint256 contributionId) external whenNotPaused {}
+    function upvoteContribution(uint256 contributionId) external whenNotPaused {
+        _contribution.upvote(contributionId);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function downvoteContribution(DataTypes.Contribution calldata contributionId)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        whenNotPaused
-    {}
+    function downvoteContribution(uint256 contributionId) external whenNotPaused {
+        _contribution.downvote(contributionId);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function removeContribution(uint256 contributionId) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    function removeContribution(uint256 contributionId) external whenNotPaused {
+        _contribution.remove(contributionId);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
     function updateContribution(uint256 contributionId, DataTypes.Contribution calldata contribution)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
-    {}
+    {
+        _contribution.update(contributionId, contribution.category, contribution.title, contribution.url);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function createContribution(DataTypes.Contribution calldata contribution)
+    function createContribution(DataTypes.Contribution calldata contribution) external whenNotPaused {
+        _contribution.create(contribution.category, contribution.title, contribution.url);
+    }
+
+    /// @inheritdoc IAmpliFrensFacade
+    function resetContributions() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        _contribution.reset();
+    }
+
+    /// @inheritdoc IAmpliFrensFacade
+    function mintNFT(address to, string memory uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        _nft.mint(to, uri);
+    }
+
+    /// @inheritdoc IAmpliFrensFacade
+    function setNFTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        _nft.setBaseURI(uri);
+    }
+
+    /// @inheritdoc IAmpliFrensFacade
+    function setNFTGlobalRoyalties(address receiver, uint96 feeNumerator)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
-    {}
+    {
+        _nft.setDefaultRoyalty(receiver, feeNumerator);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function resetContributions() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function mintNft(address to, string memory uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function setNFTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {}
+    function uriSBT(uint256 id) external view returns (string memory) {
+        return _sbt.tokenURI(id);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function setNFTGlobalRoyalties(address receiver, uint96 feeNumerator) external whenNotPaused {}
+    function getUserProfile(address _address) external view returns (DataTypes.Profile memory) {
+        return _profile.getProfile(_address);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {}
+    function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory) {
+        return _contribution.getContribution(contributionId);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {}
+    function uriNft(uint256 id) external view returns (string memory) {
+        return _nft.tokenURI(id);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function uriSBT(uint256 id) external view returns (string memory) {}
+    function balanceOfSBT(address _address) external view returns (uint256) {
+        return _sbt.balanceOf(_address);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function getUserProfile(address _address) external view returns (DataTypes.Profile memory) {}
+    function ownerOfSBT(uint256 token) external view returns (address) {
+        return _sbt.ownerOf(token);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory) {}
+    function idSBTOfOwnerByIndex(address owner, uint256 index) external view returns (uint256) {
+        return _sbt.tokenOfOwnerByIndex(owner, index);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function uriNft(uint256 id) external view returns (string memory) {}
+    function getSBTById(uint256 id) external view returns (DataTypes.Contribution memory) {
+        return _sbt.tokenById(id);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function balanceOfSBT(address _address) external view returns (uint256) {}
+    function totalSBTs() external view returns (uint256) {
+        return _sbt.emittedCount();
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function ownerOfSBT(uint256 token) external view returns (address) {}
+    function totalSBTHolders() external view returns (uint256) {
+        return _sbt.holdersCount();
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function idSBTOfOwnerByIndex(address owner, uint256 index) external view returns (uint256) {}
+    function getProfileBlacklistReason(address _address) external view returns (bytes32) {
+        return _profile.getBlacklistReason(_address);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function getSBTById(uint256 id) external view returns (DataTypes.Contribution memory) {}
+    function hasUserProfile(address _address) external view returns (bool) {
+        return _profile.hasProfile(_address);
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function isMintingIntervalMet() external view returns (bool) {}
+    function getContributions() external view returns (DataTypes.Contribution[] memory) {
+        return _contribution.getContributions();
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function totalSBTs() external view returns (uint256) {}
+    function topContribution() external view returns (DataTypes.Contribution memory) {
+        return _contribution.topContribution();
+    }
 
     /// @inheritdoc IAmpliFrensFacade
-    function totalSBTHolders() external view returns (uint256) {}
-
-    /// @inheritdoc IAmpliFrensFacade
-    function getProfileBlacklistReason(address _address) external view returns (bytes32) {}
-
-    /// @inheritdoc IAmpliFrensFacade
-    function hasUserProfile(address _address) external view returns (bool) {}
-
-    /// @inheritdoc IAmpliFrensFacade
-    function getContributions() external view returns (DataTypes.Contribution[] memory) {}
-
-    /// @inheritdoc IAmpliFrensFacade
-    function topContribution() external view returns (DataTypes.Contribution memory) {}
-
-    /// @inheritdoc IAmpliFrensFacade
-    function totalContributions() external view returns (uint256) {}
+    function totalContributions() external view returns (uint256) {
+        return _contribution.contributionsCount();
+    }
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId)
@@ -174,7 +229,7 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
         returns (bool)
     {
         return
-            type(IAmpliFrensSBT).interfaceId == interfaceId ||
+            type(IAmpliFrensFacade).interfaceId == interfaceId ||
             type(IERC165).interfaceId == interfaceId ||
             type(IAccessControlUpgradeable).interfaceId == interfaceId;
     }

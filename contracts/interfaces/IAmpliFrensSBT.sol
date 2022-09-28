@@ -127,4 +127,11 @@ interface IAmpliFrensSBT {
      * @param _address The address to retrieve contribution status
      */
     function getStatus(address _address) external view returns (DataTypes.FrenStatus);
+
+    /**
+     * @notice Set the base URI `uri` for tokens, it should end with a "/"
+     *
+     * @param uri The base URI
+     */
+    function setBaseURI(string calldata uri) external;
 }
