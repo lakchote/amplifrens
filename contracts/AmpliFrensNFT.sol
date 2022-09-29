@@ -47,7 +47,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         _;
     }
 
-    /// @dev Constructor for contract initialization
+    /// @dev Contract initialization with facade's proxy address precomputed
     constructor(address _facadeProxy) ERC721("AmpliFrens", "AFREN") {
         facadeProxy = _facadeProxy;
     }
@@ -78,6 +78,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         ERC721.safeTransferFrom(from, to, tokenId);
     }
 
+    /// @inheritdoc IAmpliFrensNFT
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) external {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
         if (receiver == address(0)) {
@@ -97,11 +98,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         baseURI = uri;
     }
 
-    /**
-     * @notice Get the token URI for the token with id `tokenId`
-     *
-     * @param tokenId The token id to retrieve the URI
-     */
+    /// @inheritdoc ERC721
     function tokenURI(uint256 tokenId)
         public
         view

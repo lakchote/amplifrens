@@ -20,11 +20,23 @@ library ProfileLogic {
     event ProfileUpdated(address indexed _address, uint256 timestamp);
     event ProfileDeleted(address indexed _address, uint256 timestamp);
 
+    /**
+     * @notice Check if address `_address` has created a profile
+     *
+     * @param _address The address to check profile existence
+     * @param _profiles The current profiles list
+     */
     modifier hasProfile(address _address, mapping(address => DataTypes.Profile) storage _profiles) {
         if (!_profiles[_address].valid) revert Errors.NoProfileWithAddress();
         _;
     }
 
+    /**
+     * @notice Check if handle `handle` exist
+     *
+     * @param _handlesMap Social handles mapping with addresses
+     * @param handle The handle to check existence
+     */
     modifier hasHandleExistence(mapping(bytes32 => address) storage _handlesMap, bytes32 handle) {
         if (_handlesMap[handle] == address(0)) revert Errors.NoProfileWithSocialHandle();
         _;
