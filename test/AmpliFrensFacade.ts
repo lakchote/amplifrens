@@ -421,7 +421,7 @@ describe("Facade", async () => {
 
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensFacade", async () => {
-      expect(await facadeProxyContract.supportsInterface("0xf6f6c46f")).to.be.true;
+      expect(await facadeProxyContract.supportsInterface("0x9f1f0e8e")).to.be.true;
     });
 
     it("Should support IERC165", async () => {
