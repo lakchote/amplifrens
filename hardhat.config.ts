@@ -6,6 +6,9 @@ import "@nomiclabs/hardhat-solhint";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
+import "./tasks/full-deploy";
+import "./tasks/mint-nfts";
+import "./tasks/set-nft-base-uri";
 
 dotenv.config();
 
@@ -15,18 +18,18 @@ const {
   POLYGONSCAN_API_KEY,
   COINMARKETCAP_API_KEY,
   REPORT_GAS,
-  WALLET_PRIVATE_KEY,
+  DEPLOYER_WALLET_PRIVATE_KEY,
 } = process.env;
 
 const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       url: POLYGON_MUMBAI_RPC_PROVIDER,
-      accounts: [WALLET_PRIVATE_KEY!],
+      accounts: [DEPLOYER_WALLET_PRIVATE_KEY!],
     },
     matic: {
       url: POLYGON_MAINNET_RPC_PROVIDER,
-      accounts: [WALLET_PRIVATE_KEY!],
+      accounts: [DEPLOYER_WALLET_PRIVATE_KEY!],
     },
   },
   solidity: {
