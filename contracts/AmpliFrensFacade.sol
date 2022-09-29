@@ -123,6 +123,15 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
     }
 
     /// @inheritdoc IAmpliFrensFacade
+    function transferNFT(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _nft.transferNFT(from, to, tokenId);
+    }
+
+    /// @inheritdoc IAmpliFrensFacade
     function setNFTBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         _nft.setBaseURI(uri);
     }

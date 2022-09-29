@@ -64,9 +64,10 @@ describe("NFT", async () => {
       await expect(await nftContract.ownerOf(4)).to.eq(accounts[0].address);
     });
 
-    it("Should be called by the MINTER_ROLE only", async () => {
-      await expect(nftContract.connect(accounts[1]).mint(accounts[1].address, "http://www.example.com/1.json")).to.be
-        .reverted;
+    it("Should be called by the facade proxy address only", async () => {
+      await expect(
+        nftContract.connect(accounts[1]).mint(accounts[1].address, "http://www.example.com/1.json")
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
   });
 
@@ -85,6 +86,12 @@ describe("NFT", async () => {
         "AlreadyOwnNft"
       );
     });
+    it("Should revert if the caller is not the token owner nor approved", async () => {
+      const mintTx = await nftContract.mint(accounts[0].address, `http://www.example.com/1.json`);
+      await mintTx.wait();
+      await expect(nftContract.connect(accounts[1]).transferNFT(accounts[0].address, accounts[1].address, 1)).to.be
+        .reverted;
+    });
   });
 
   describe("Royalties", async () => {
@@ -100,8 +107,10 @@ describe("NFT", async () => {
       expect(receiverAddress).to.be.eq(accounts[1].address);
     });
 
-    it("Should be called by the DEFAULT_ADMIN_ROLE only", async () => {
-      await expect(nftContract.connect(accounts[1]).setDefaultRoyalty(accounts[1].address, 1000)).to.be.reverted;
+    it("Should be called by the facade's proxy address only", async () => {
+      await expect(
+        nftContract.connect(accounts[1]).setDefaultRoyalty(accounts[1].address, 1000)
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
 
     it("Should revert if new receiver is address(0)", async () => {
@@ -153,6 +162,12 @@ describe("NFT", async () => {
       await mintTx.wait();
       const tokenURI = await nftContract.tokenURI(BigNumber.from("1"));
       expect(tokenURI).to.eq("https://www.amplifrens.xyz/1.json");
+    });
+
+    it("Should be called by the facade's proxy address only", async () => {
+      await expect(
+        nftContract.connect(accounts[1]).setBaseURI("https://www.amplifrens.xyz/")
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
   });
   describe("Burning", async () => {

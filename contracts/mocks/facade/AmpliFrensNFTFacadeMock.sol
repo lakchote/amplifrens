@@ -13,10 +13,12 @@ contract AmpliFrensNFTFacadeMock is IAmpliFrensNFT {
     }
 
     function transferNFT(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external {}
+        address,
+        address,
+        uint256
+    ) external {
+        emit NFTContract();
+    }
 
     function setDefaultRoyalty(address, uint96) external {
         emit NFTContract();

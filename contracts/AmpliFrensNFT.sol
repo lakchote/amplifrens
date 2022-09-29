@@ -66,6 +66,9 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         _setTokenURI(tokenId, uri);
     }
 
+    /**
+     * @notice Transfer the NFT with id `tokenId` from address `from` to address `to`
+     */
     function transferNFT(
         address from,
         address to,

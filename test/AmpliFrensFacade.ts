@@ -70,6 +70,13 @@ describe("Facade", async () => {
       await expect(await facadeProxyContract.mintNFT(accounts[2].address, "1")).to.emit(nftContract, "NFTContract");
     });
 
+    it("Should forward to IAmpliFrensNFT to transfer NFT", async () => {
+      await expect(await facadeProxyContract.transferNFT(accounts[0].address, accounts[1].address, "1")).to.emit(
+        nftContract,
+        "NFTContract"
+      );
+    });
+
     it("Should forward to IAmpliFrensNFT to set NFT base uri", async () => {
       await expect(await facadeProxyContract.setNFTBaseURI("https://www.amplifrens.xyz")).to.emit(
         nftContract,

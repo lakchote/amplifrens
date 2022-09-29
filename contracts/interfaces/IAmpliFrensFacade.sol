@@ -234,6 +234,15 @@ interface IAmpliFrensFacade {
     function mintNFT(address to, string memory uri) external;
 
     /**
+     * @notice Transfer the NFT with id `tokenId` from address `from` to address `to`
+     */
+    function transferNFT(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+
+    /**
      * @notice Set the NFT base URI
      *
      * @param uri The new base uri for the NFTs
