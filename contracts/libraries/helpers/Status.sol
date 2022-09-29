@@ -10,6 +10,11 @@ import {DataTypes} from "../types/DataTypes.sol";
  * @notice Handles the statuses calculation
  */
 library Status {
+    /**
+     * @notice Get the corresponding status for amount of tokens `totalTokens`
+     *
+     * @return The corresponding status of type `DataTypes.FrenStatus`
+     */
     function getStatus(uint256 totalTokens) external pure returns (DataTypes.FrenStatus) {
         if (totalTokens >= 34) {
             return DataTypes.FrenStatus.Oracle;

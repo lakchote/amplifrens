@@ -74,11 +74,7 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
         SBTLogic.revoke(tokenId, _tokens, _validTokensForAddress);
     }
 
-    /**
-     * @notice Sets the base URI `uri` for tokens, it should end with a "/"
-     *
-     * @param uri The base URI
-     */
+    /// @inheritdoc IAmpliFrensSBT
     function setBaseURI(string calldata uri) external {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
         baseURI = uri;
@@ -144,7 +140,8 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
 
     /**
      *  @notice Get the last block timestamp when minting occured
-     * (if minting happened at least once, otherwise it is the contract's initialization timestamp)
+     *
+     *  @dev if minting happened at least once otherwise it's the contract initialization timestamp
      */
     function lastBlockTimestamp() external view returns (uint256) {
         return mintingParams.lastBlockTimestamp;

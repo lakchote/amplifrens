@@ -26,6 +26,7 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
     IAmpliFrensNFT internal immutable _nft;
     IAmpliFrensSBT internal immutable _sbt;
 
+    /// @dev Contract initialization with interfaces of the subsystem
     constructor(
         IAmpliFrensContribution contribution,
         IAmpliFrensProfile profile,
@@ -38,6 +39,12 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
         _sbt = sbt;
     }
 
+    /**
+     * @notice Initialize the implementation and grant the admin role to `adminAddress`
+     *
+     * @dev To be called by the proxy
+     * @param adminAddress The address to grant the admin role
+     */
     function initialize(address adminAddress) public initializer {
         __Pausable_init();
         __AccessControl_init();
