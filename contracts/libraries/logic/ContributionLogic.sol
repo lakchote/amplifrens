@@ -171,7 +171,7 @@ library ContributionLogic {
         uint256 contributionsLength = _contributionsCounter.current();
         DataTypes.Contribution[] memory contributions = new DataTypes.Contribution[](contributionsLength);
 
-        for (uint256 i = 0; i < contributionsLength; i++) {
+        for (uint256 i = 0; i < contributionsLength; ++i) {
             contributions[i] = container.contribution[i];
         }
 
@@ -209,7 +209,7 @@ library ContributionLogic {
         uint256 topContributionId = 0;
         uint256 contributionsLength = _contributionsCounter.current();
 
-        for (uint256 i = 1; i <= contributionsLength; i++) {
+        for (uint256 i = 1; i <= contributionsLength; ++i) {
             if (int256(container.contribution[i].votes) > topVotes) {
                 topContributionId = i;
                 topVotes = container.contribution[i].votes;
@@ -232,19 +232,19 @@ library ContributionLogic {
         uint256 upvoterAddresses = container.upvoterAddresses.length;
         uint256 downvoterAddresses = container.downvoterAddresses.length;
 
-        for (uint256 i = 1; i <= contributionsLength; i++) {
+        for (uint256 i = 1; i <= contributionsLength; ++i) {
             delete container.contribution[i];
         }
 
-        for (uint256 i = 1; i <= upvotedIds; i++) {
-            for (uint256 a = 0; a < upvoterAddresses; a++) {
+        for (uint256 i = 1; i <= upvotedIds; ++i) {
+            for (uint256 a = 0; a < upvoterAddresses; ++a) {
                 if (container.upvoted[i][container.upvoterAddresses[a]]) {
                     delete container.upvoted[i][container.upvoterAddresses[a]];
                 }
             }
         }
-        for (uint256 i = 1; i <= downvotedIds; i++) {
-            for (uint256 a = 0; a < downvoterAddresses; a++) {
+        for (uint256 i = 1; i <= downvotedIds; ++i) {
+            for (uint256 a = 0; a < downvoterAddresses; ++a) {
                 if (container.downvoted[i][container.downvoterAddresses[a]]) {
                     delete container.downvoted[i][container.downvoterAddresses[a]];
                 }
