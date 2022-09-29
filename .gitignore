@@ -6,13 +6,19 @@ typechain
 typechain-types
 yarn-error.log
 
-#Hardhat files
+# Hardhat files
 cache
 artifacts
 gas_report*.txt
 
 # OpenZeppelin Upgrades (dev)
 .openzeppelin/unknown-*.json
+
+# NFTs metadata
+nfts/metadata
+
+# Deployment contract addresses
+addresses.json
 
 # Mac specific
 .DS_STORE

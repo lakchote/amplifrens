@@ -7,15 +7,16 @@
   "author": "Lucien Akchoté <lakchote@icloud.com>",
   "license": "GPL-3.0-only",
   "scripts": {
-    "compile": "hardhat compile",
+    "compile": "SKIP_LOAD=true hardhat clean && SKIP_LOAD=true hardhat compile",
     "test": "hardhat test",
     "clean": "hardhat clean",
-    "coverage": "hardhat coverage",
+    "coverage": "yarn compile && hardhat coverage",
     "lint": "solhint contracts/**/*.sol",
-    "deploy-nft-mumbai": "yarn ts-node scripts/deployNft.ts maticmum true",
-    "deploy-nft-polygon": "yarn ts-node scripts/deployNft.ts matic true",
-    "deploy-sbt-mumbai": "yarn hardhat run scripts/deploySbt.ts --network mumbai",
-    "deploy-sbt-polygon": "yarn hardhat run scripts/deploySbt.ts --network matic"
+    "hardhat": "hardhat",
+    "full-deploy-mumbai-ipfs": "hardhat full-deploy --ipfs --network mumbai",
+    "full-deploy-mumbai": "hardhat full-deploy --network mumbai",
+    "full-deploy-matic-ipfs": "hardhat full-deploy --ipfs --network matic",
+    "full-deploy-matic": "hardhat full-deploy --network matic"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",

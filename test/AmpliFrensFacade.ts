@@ -70,6 +70,13 @@ describe("Facade", async () => {
       await expect(await facadeProxyContract.mintNFT(accounts[2].address, "1")).to.emit(nftContract, "NFTContract");
     });
 
+    it("Should forward to IAmpliFrensNFT to transfer NFT", async () => {
+      await expect(await facadeProxyContract.transferNFT(accounts[0].address, accounts[1].address, "1")).to.emit(
+        nftContract,
+        "NFTContract"
+      );
+    });
+
     it("Should forward to IAmpliFrensNFT to set NFT base uri", async () => {
       await expect(await facadeProxyContract.setNFTBaseURI("https://www.amplifrens.xyz")).to.emit(
         nftContract,
@@ -414,7 +421,7 @@ describe("Facade", async () => {
 
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensFacade", async () => {
-      expect(await facadeProxyContract.supportsInterface("0xf6f6c46f")).to.be.true;
+      expect(await facadeProxyContract.supportsInterface("0x9f1f0e8e")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

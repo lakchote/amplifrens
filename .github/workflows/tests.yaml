@@ -6,6 +6,7 @@ env:
   POLYGON_MAINNET_RPC_PROVIDER: ${{ secrets.POLYGON_MAINNET_RPC_PROVIDER }}
   POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
   COINMARKETCAP_API_KEY:  ${{ secrets.COINMARKETCAP_API_KEY }}
+  DEPLOYER_WALLET_PRIVATE_KEY: ${{ secrets.DEPLOYER_WALLET_PRIVATE_KEY }}
 on:
   push:
     branches: 
@@ -29,8 +30,5 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Generate typechain
-        run: yarn hardhat typechain
-
-      - name: Run coverage
-        run: yarn hardhat coverage
+      - name: Compile and run coverage
+        run: yarn coverage
