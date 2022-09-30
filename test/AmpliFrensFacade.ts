@@ -65,6 +65,14 @@ describe("Facade", async () => {
     facadeProxyContract = AmpliFrensFacade__factory.connect(proxyFactory.address, accounts[1]);
   });
 
+  describe("Upgradeability", async () => {
+    it("Should be initializable once only", async () => {
+      await expect(facadeProxyContract.initialize(accounts[2].address)).to.be.revertedWith(
+        "Initializable: contract is already initialized"
+      );
+    });
+  });
+
   describe("NFT", async () => {
     it("Should forward to IAmpliFrensNFT to mint NFT", async () => {
       await expect(await facadeProxyContract.mintNFT(accounts[2].address, "1")).to.emit(nftContract, "NFTContract");
