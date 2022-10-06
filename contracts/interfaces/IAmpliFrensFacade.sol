@@ -11,29 +11,15 @@ import {DataTypes} from "../libraries/types/DataTypes.sol";
  */
 interface IAmpliFrensFacade {
     /**
-     * //////////////////////////////////////////////////
-     * @dev Start of Keeper (cron-like) related functions
-     * //////////////////////////////////////////////////
+     * /////////////////////////////////////////////////////
+     * @dev Start of Soulbound token (SBT) related functions
+     * /////////////////////////////////////////////////////
      *
-     *  @notice Check if automated minting of soulbound tokens
-     *  for the contribution of the day needs to be done
+     * @notice Mint a Soulbound Token for today's most upvoted contribution
      *
-     *  @dev Used by Chainlink Keeper to know if keeper needs to be triggered
-     *
-     *  @param checkData bytes that will be used as input parameter
+     * @param contribution Contribution of the day's data
      */
-    function checkUpkeep(bytes calldata checkData) external returns (bool upkeepNeeded, bytes memory performData);
-
-    /**
-     * @notice Perform the automated minting of soulbound tokens
-     * for the contribution of the day
-     *
-     * @dev Used by Chainlink Keeper to perform cron logic
-     * (in our case: automated minting of soulbound tokens)
-     *
-     * @param performData bytes that will be used as input parameter
-     */
-    function performUpkeep(bytes calldata performData) external;
+    function mintSBT(DataTypes.Contribution calldata contribution) external;
 
     /**
      * /////////////////////////////////////////////////////
@@ -125,7 +111,7 @@ interface IAmpliFrensFacade {
      * @param _address The profile's address to blacklist
      * @param reason The reason of the blacklist
      */
-    function blacklistUserProfile(address _address, bytes32 reason) external;
+    function blacklistUserProfile(address _address, string calldata reason) external;
 
     /**
      * @notice Get the profile if applicable for address `_address`
@@ -140,7 +126,7 @@ interface IAmpliFrensFacade {
      * @param _address The profile's address to query
      * @return The reason of the blacklist
      */
-    function getProfileBlacklistReason(address _address) external view returns (bytes32);
+    function getProfileBlacklistReason(address _address) external view returns (string memory);
 
     /**
      * @notice Check if address `_address` has a profile
@@ -193,26 +179,12 @@ interface IAmpliFrensFacade {
     function resetContributions() external;
 
     /**
-     * @notice Get the total contributions
-     *
-     * @return Total contributions of type `DataTypes.Contribution`
-     */
-    function getContributions() external view returns (DataTypes.Contribution[] memory);
-
-    /**
      * @notice Get the contribution with id `contributionId`
      *
      * @param contributionId The id of the contribution to retrieve
      * @return Contribution with id `contributionId` of type `DataTypes.Contribution`
      */
     function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory);
-
-    /**
-     * @notice Get today's most upvoted contribution
-     *
-     * @return `DataTypes.Contribution`
-     */
-    function topContribution() external view returns (DataTypes.Contribution memory);
 
     /**
      * @notice Return the total number of contributions

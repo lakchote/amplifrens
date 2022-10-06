@@ -10,10 +10,60 @@ import {DataTypes} from "../libraries/types/DataTypes.sol";
  * @notice Handles the day to day operations for interacting with contributions
  */
 interface IAmpliFrensContribution {
-    /// @dev Events related to contributions interaction
-    event Upvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
-    event Downvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
-    event Updated(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    /**
+     * @notice Event that is emitted when a contribution is upvoted
+     *
+     * @param from The address who upvoted
+     * @param contributionId The id of the contribution
+     * @param timestamp The time of upvote
+     */
+    event ContributionUpvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+
+    /**
+     * @notice Event that is emitted when a contribution is downvoted
+     *
+     * @param from The address who downvoted
+     * @param contributionId The id of the contribution
+     * @param timestamp The time of downvote
+     */
+    event ContributionDownvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+
+    /**
+     * @notice Event that is emitted when a contribution is updated
+     *
+     * @param from The address who updated
+     * @param contributionId The id of the contribution
+     * @param timestamp The time of the update
+     */
+    event ContributionUpdated(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+
+    /**
+     * @notice Event that is emitted when a contribution is removed
+     *
+     * @param from The address who removed contribution
+     * @param contributionId The id of the contribution
+     * @param timestamp The time of the removal
+     */
+    event ContributionRemoved(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+
+    /**
+     * @notice Event that is emitted when a contribution is created
+     *
+     * @param from The address who created the contribution
+     * @param contributionId The id of the contribution
+     * @param timestamp The time of the creation
+     * @param category The contribution category
+     * @param title The title of the contribution
+     * @param url The URL of the contribution
+     */
+    event ContributionCreated(
+        address indexed from,
+        uint256 contributionId,
+        uint256 timestamp,
+        DataTypes.ContributionCategory category,
+        string title,
+        string url
+    );
 
     /**
      * @notice Upvote the contribution with id `contributionId`
@@ -47,7 +97,7 @@ interface IAmpliFrensContribution {
     function update(
         uint256 contributionId,
         DataTypes.ContributionCategory category,
-        bytes32 title,
+        string calldata title,
         string calldata url
     ) external;
 
@@ -60,19 +110,12 @@ interface IAmpliFrensContribution {
      */
     function create(
         DataTypes.ContributionCategory category,
-        bytes32 title,
+        string calldata title,
         string calldata url
     ) external;
 
     /// @notice Reset the contributions
     function reset() external;
-
-    /**
-     * @notice Get the total contributions
-     *
-     * @return Total contributions of type `DataTypes.Contribution`
-     */
-    function getContributions() external view returns (DataTypes.Contribution[] memory);
 
     /**
      * @notice Get the contribution with id `contributionId`
@@ -81,13 +124,6 @@ interface IAmpliFrensContribution {
      * @return Contribution with id `contributionId` of type `DataTypes.Contribution`
      */
     function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory);
-
-    /**
-     * @notice Get the most upvoted contribution
-     *
-     * @return `DataTypes.Contribution`
-     */
-    function topContribution() external view returns (DataTypes.Contribution memory);
 
     /**
      * @notice Return the total number of contributions

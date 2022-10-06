@@ -15,10 +15,10 @@ library ProfileLogic {
     using Counters for Counters.Counter;
 
     /// @dev See `IAmpliFrensProfile` for descriptions
-    event ProfileBlacklisted(address indexed _address, bytes32 indexed reason, uint256 timestamp);
-    event ProfileCreated(address indexed _address, uint256 timestamp);
+    event ProfileBlacklisted(address _address, string indexed reason, uint256 timestamp);
     event ProfileUpdated(address indexed _address, uint256 timestamp);
     event ProfileDeleted(address indexed _address, uint256 timestamp);
+    event ProfileCreated(address indexed _address, uint256 timestamp, string username);
 
     /**
      * @notice Check if address `_address` has created a profile
@@ -37,7 +37,7 @@ library ProfileLogic {
      * @param _handlesMap Social handles mapping with addresses
      * @param handle The handle to check existence
      */
-    modifier hasHandleExistence(mapping(bytes32 => address) storage _handlesMap, bytes32 handle) {
+    modifier hasHandleExistence(mapping(string => address) storage _handlesMap, string calldata handle) {
         if (_handlesMap[handle] == address(0)) revert Errors.NoProfileWithSocialHandle();
         _;
     }
@@ -53,8 +53,8 @@ library ProfileLogic {
      */
     function blackList(
         address _address,
-        bytes32 reason,
-        mapping(address => bytes32) storage _blacklistedAddresses,
+        string calldata reason,
+        mapping(address => string) storage _blacklistedAddresses,
         mapping(address => DataTypes.Profile) storage _profiles,
         Counters.Counter storage profilesCount
     ) external hasProfile(_address, _profiles) {
@@ -62,6 +62,7 @@ library ProfileLogic {
         profilesCount.decrement();
 
         delete (_profiles[_address]);
+
         emit ProfileBlacklisted(_address, reason, block.timestamp);
     }
 
@@ -75,10 +76,10 @@ library ProfileLogic {
     function createProfile(
         DataTypes.Profile calldata profile,
         mapping(address => DataTypes.Profile) storage _profiles,
-        mapping(bytes32 => address) storage _usernames,
+        mapping(string => address) storage _usernames,
         Counters.Counter storage profilesCount
     ) external {
-        if (bytes1(profile.username) == 0x00) revert Errors.EmptyUsername();
+        if (bytes8(bytes(profile.username)) == 0x00) revert Errors.EmptyUsername();
         if (_usernames[profile.username] != address(0)) revert Errors.UsernameExist();
 
         _profiles[msg.sender] = DataTypes.Profile(
@@ -95,7 +96,7 @@ library ProfileLogic {
 
         profilesCount.increment();
 
-        emit ProfileCreated(msg.sender, block.timestamp);
+        emit ProfileCreated(msg.sender, block.timestamp, profile.username);
     }
 
     /**
@@ -127,9 +128,9 @@ library ProfileLogic {
     function updateProfile(
         DataTypes.Profile calldata profile,
         mapping(address => DataTypes.Profile) storage _profiles,
-        mapping(bytes32 => address) storage _usernames
+        mapping(string => address) storage _usernames
     ) external hasProfile(msg.sender, _profiles) {
-        if (bytes1(profile.username) != 0x00) {
+        if (bytes8(bytes(profile.username)) != 0x00) {
             delete (_usernames[_profiles[msg.sender].username]);
             _usernames[profile.username] = msg.sender;
             _profiles[msg.sender].username = profile.username;
@@ -151,12 +152,12 @@ library ProfileLogic {
      * @param _blacklistedAddresses The addresses of all blacklisted addresses
      * @return The blacklist reason
      */
-    function getBlacklistReason(address _address, mapping(address => bytes32) storage _blacklistedAddresses)
+    function getBlacklistReason(address _address, mapping(address => string) storage _blacklistedAddresses)
         external
         view
-        returns (bytes32)
+        returns (string memory)
     {
-        if (bytes1(_blacklistedAddresses[_address]) == 0x00) revert Errors.NotBlacklisted();
+        if (bytes8(bytes(_blacklistedAddresses[_address])) == 0x00) revert Errors.NotBlacklisted();
         return _blacklistedAddresses[_address];
     }
 
@@ -184,8 +185,8 @@ library ProfileLogic {
      * @return `DataTypes.Profile` containing the profile data
      */
     function getProfileByUsername(
-        bytes32 username,
-        mapping(bytes32 => address) storage _usernames,
+        string calldata username,
+        mapping(string => address) storage _usernames,
         mapping(address => DataTypes.Profile) storage _profiles
     ) external view hasHandleExistence(_usernames, username) returns (DataTypes.Profile memory) {
         return _profiles[_usernames[username]];

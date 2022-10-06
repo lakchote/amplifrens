@@ -17,15 +17,16 @@ interface IAmpliFrensProfile {
      * @param reason   The reason of the blacklist
      * @param timestamp The time when blacklisting occured
      */
-    event ProfileBlacklisted(address indexed _address, bytes32 indexed reason, uint256 timestamp);
+    event ProfileBlacklisted(address _address, string indexed reason, uint256 timestamp);
 
     /**
      * @notice Event that is emitted when a profile is created
      *
      * @param _address The profile's address created
      * @param timestamp The time when profile creation occurred
+     * @param username The time when profile creation occurred
      */
-    event ProfileCreated(address indexed _address, uint256 timestamp);
+    event ProfileCreated(address indexed _address, uint256 timestamp, string username);
 
     /**
      * @notice Event that is emitted when a profile is updated
@@ -76,7 +77,7 @@ interface IAmpliFrensProfile {
      * @param _address The profile's address to blacklist
      * @param reason The reason of the blacklist
      */
-    function blacklist(address _address, bytes32 reason) external;
+    function blacklist(address _address, string calldata reason) external;
 
     /**
      * @notice Get the blacklist reason for address `_address`
@@ -84,14 +85,14 @@ interface IAmpliFrensProfile {
      * @param _address The profile's address to query
      * @return The reason of the blacklist
      */
-    function getBlacklistReason(address _address) external view returns (bytes32);
+    function getBlacklistReason(address _address) external view returns (string memory);
 
     /**
      * @notice Get a profile by its username `username`
      *
      * @return `DataTypes.Profile` containing the profile data
      */
-    function getProfileByUsername(bytes32 username) external view returns (DataTypes.Profile memory);
+    function getProfileByUsername(string calldata username) external view returns (DataTypes.Profile memory);
 
     /**
      * @notice Check if address `_address` has a profile

@@ -52,7 +52,7 @@ contract AmpliFrensContribution is IERC165, IAmpliFrensContribution {
     function update(
         uint256 contributionId,
         DataTypes.ContributionCategory category,
-        bytes32 title,
+        string calldata title,
         string calldata url
     ) external {
         PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
@@ -62,7 +62,7 @@ contract AmpliFrensContribution is IERC165, IAmpliFrensContribution {
     /// @inheritdoc IAmpliFrensContribution
     function create(
         DataTypes.ContributionCategory category,
-        bytes32 title,
+        string calldata title,
         string calldata url
     ) external {
         ContributionLogic.create(category, title, url, contributions, _contributionsCounter);
@@ -75,19 +75,9 @@ contract AmpliFrensContribution is IERC165, IAmpliFrensContribution {
     }
 
     /// @inheritdoc IAmpliFrensContribution
-    function getContributions() external view returns (DataTypes.Contribution[] memory) {
-        return ContributionLogic.getContributions(contributions, _contributionsCounter);
-    }
-
-    /// @inheritdoc IAmpliFrensContribution
     function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory) {
         PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
         return ContributionLogic.getContribution(contributionId, contributions);
-    }
-
-    /// @inheritdoc IAmpliFrensContribution
-    function topContribution() external view returns (DataTypes.Contribution memory) {
-        return ContributionLogic.topContribution(contributions, _contributionsCounter);
     }
 
     /// @inheritdoc IAmpliFrensContribution
