@@ -34,36 +34,48 @@ library DataTypes {
      *  @notice Contain the basic information of a contribution
      *
      *  @dev Use tight packing to save up on storage cost
-     *  4 storage slots used (string takes up 64 bytes or 2 slots in the storage)
+     *  7 storage slots used (string takes up 64 bytes or 2 slots in the storage)
      */
     struct Contribution {
         address author; /// @dev 20 bytes
         ContributionCategory category; /// @dev 1 byte
         bool valid; /// @dev 1 byte
-        uint64 timestamp; /// @dev 8 bytes
-        int16 votes; /// @dev 2 bytes
-        bytes32 title; /// @dev 32 bytes
-        string url; /// @dev 64 bytes
+        uint256 timestamp; /// @dev 32 bytes
+        int256 votes; /// @dev 32 bytes
+        string title;
+        string url;
     }
 
-    /// @notice Contain the basic information of a profile
+    /**
+     * @notice Contain the basic information of a profile
+     *
+     * @see `https://docs.soliditylang.org/en/latest/types.html#bytes-and-string-as-arrays`
+     */
     struct Profile {
-        bytes32 lensHandle;
-        bytes32 discordHandle;
-        bytes32 twitterHandle;
-        bytes32 username;
-        bytes32 email;
+        string lensHandle;
+        string discordHandle;
+        string twitterHandle;
+        string username;
+        string email;
         string websiteUrl;
         bool valid;
     }
 
-    /// @notice These time-related variables are used in conjunction to determine when minting function can be called
+    /**
+     * @notice These time-related variables are used in conjunction to determine when minting function can be called
+     *
+     * @dev No tight packing possible, max bytes32 value(2^32-1) will be reached in 2038
+     */
     struct MintingInterval {
         uint256 lastBlockTimestamp;
         uint256 mintInterval;
     }
 
-    /// @notice Contain contributions data
+    /**
+     * @notice Contain contributions data
+     *
+     * @dev address[] && uint256[] are used to iterate over upvoted/downvoted mappings
+     */
     struct Contributions {
         mapping(uint256 => DataTypes.Contribution) contribution;
         mapping(uint256 => mapping(address => bool)) upvoted;
