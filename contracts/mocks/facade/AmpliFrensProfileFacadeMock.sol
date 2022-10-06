@@ -15,11 +15,11 @@ contract AmpliFrensProfileFacadeMock is IAmpliFrensProfile {
     function getProfile(address) external pure override returns (DataTypes.Profile memory) {
         return
             DataTypes.Profile(
-                bytes32("d3legateCall.lens"),
-                bytes32("randomuser#1234"),
-                bytes32("d3legateCall"),
-                bytes32("d3legateCall"),
-                bytes32("anon@mirror.xyz"),
+                "d3legateCall.lens",
+                "randomuser#1234",
+                "d3legateCall",
+                "d3legateCall",
+                "anon@mirror.xyz",
                 "https://www.anon.xyz",
                 true
             );
@@ -33,22 +33,22 @@ contract AmpliFrensProfileFacadeMock is IAmpliFrensProfile {
         emit ProfileContract();
     }
 
-    function blacklist(address, bytes32) external override {
+    function blacklist(address, string calldata) external override {
         emit ProfileContract();
     }
 
-    function getBlacklistReason(address) external pure override returns (bytes32) {
-        return bytes32("IAmpliFrensProfile");
+    function getBlacklistReason(address) external pure override returns (string memory) {
+        return "IAmpliFrensProfile";
     }
 
-    function getProfileByUsername(bytes32) external pure override returns (DataTypes.Profile memory) {
+    function getProfileByUsername(string calldata) external pure override returns (DataTypes.Profile memory) {
         return
             DataTypes.Profile(
-                bytes32("d3legateCall.lens"),
-                bytes32("randomuser#1234"),
-                bytes32("d3legateCall"),
-                bytes32("d3legateCall"),
-                bytes32("anon@mirror.xyz"),
+                "d3legateCall.lens",
+                "randomuser#1234",
+                "d3legateCall",
+                "d3legateCall",
+                "anon@mirror.xyz",
                 "https://www.anon.xyz",
                 true
             );

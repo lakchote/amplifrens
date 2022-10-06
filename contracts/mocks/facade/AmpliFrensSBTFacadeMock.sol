@@ -64,7 +64,7 @@ contract AmpliFrensSBTFacadeMock is IAmpliFrensSBT {
                 address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045),
                 DataTypes.ContributionCategory(7),
                 true,
-                uint64(1664280770),
+                1664280770,
                 1337,
                 "You won't believe this WL",
                 "https://notboredapeyachtclub.com/whitelist"
