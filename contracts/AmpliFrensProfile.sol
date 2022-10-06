@@ -19,8 +19,8 @@ contract AmpliFrensProfile is IERC165, IAmpliFrensProfile {
     using Counters for Counters.Counter;
 
     mapping(address => DataTypes.Profile) private _profiles;
-    mapping(bytes32 => address) private _usernames;
-    mapping(address => bytes32) private _blacklistedAddresses;
+    mapping(string => address) private _usernames;
+    mapping(address => string) private _blacklistedAddresses;
 
     Counters.Counter public profilesCount;
 
@@ -32,7 +32,7 @@ contract AmpliFrensProfile is IERC165, IAmpliFrensProfile {
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function blacklist(address _address, bytes32 reason) external {
+    function blacklist(address _address, string calldata reason) external {
         PseudoModifier.addressEq(facadeProxy, msg.sender);
         ProfileLogic.blackList(_address, reason, _blacklistedAddresses, _profiles, profilesCount);
     }
@@ -53,7 +53,7 @@ contract AmpliFrensProfile is IERC165, IAmpliFrensProfile {
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function getBlacklistReason(address _address) external view returns (bytes32 reason) {
+    function getBlacklistReason(address _address) external view returns (string memory reason) {
         reason = ProfileLogic.getBlacklistReason(_address, _blacklistedAddresses);
     }
 
@@ -63,7 +63,7 @@ contract AmpliFrensProfile is IERC165, IAmpliFrensProfile {
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function getProfileByUsername(bytes32 username) external view returns (DataTypes.Profile memory profile) {
+    function getProfileByUsername(string calldata username) external view returns (DataTypes.Profile memory profile) {
         profile = ProfileLogic.getProfileByUsername(username, _usernames, _profiles);
     }
 

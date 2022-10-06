@@ -10,11 +10,11 @@ describe("Profiles", async () => {
   let errorsLib: Errors;
 
   // The following consts will be used for default profile params
-  const username = ethers.utils.formatBytes32String("satoshi");
-  const lensHandle = ethers.utils.formatBytes32String("d3legatecall.lens");
-  const discordHandle = ethers.utils.formatBytes32String("d3legatecall.lens");
-  const twitterHandle = ethers.utils.formatBytes32String("Luc#8673");
-  const email = ethers.utils.formatBytes32String("lakchote@icloud.com");
+  const username = "satoshi";
+  const lensHandle = "d3legatecall.lens";
+  const discordHandle = "d3legatecall.lens";
+  const twitterHandle = "Luc#8673";
+  const email = "lakchote@icloud.com";
   const websiteUrl = "https://www.twitter.com/profile/alphaMaker";
 
   beforeEach(async () => {
@@ -51,11 +51,11 @@ describe("Profiles", async () => {
     it("Should update the profiles count correctly", async () => {
       expect(await profileContract.profilesCount()).to.be.eq(1);
       const createProfileTx = await profileContract.createProfile({
-        username: ethers.utils.formatBytes32String("abc"),
-        lensHandle: ethers.utils.formatBytes32String("abc.lens"),
-        discordHandle: ethers.utils.formatBytes32String("abc#1234"),
-        twitterHandle: ethers.utils.formatBytes32String("abc"),
-        email: ethers.utils.formatBytes32String("test@test.com"),
+        username: "abc",
+        lensHandle: "abc.lens",
+        discordHandle: "abc#1234",
+        twitterHandle: "abc",
+        email: "test@test.com",
         websiteUrl: websiteUrl,
         valid: true,
       });
@@ -70,7 +70,7 @@ describe("Profiles", async () => {
     it("Should throw an error if username is empty", async () => {
       await expect(
         profileContract.createProfile({
-          username: ethers.utils.formatBytes32String(""),
+          username: "",
           lensHandle: lensHandle,
           discordHandle: discordHandle,
           twitterHandle: twitterHandle,
@@ -121,41 +121,35 @@ describe("Profiles", async () => {
 
   describe("Events", async () => {
     it("Should trigger a ProfileBlacklisted event when a user is blacklisted", async () => {
-      await expect(profileContract.blacklist(accounts[0].address, ethers.utils.formatBytes32String("Spam")))
+      await expect(profileContract.blacklist(accounts[0].address, "Spam"))
         .to.emit(profileContract, "ProfileBlacklisted")
-        .withArgs(
-          accounts[0].address,
-          ethers.utils.formatBytes32String("Spam"),
-          (
-            await ethers.provider.getBlock("latest")
-          ).timestamp
-        );
+        .withArgs(accounts[0].address, "Spam", (await ethers.provider.getBlock("latest")).timestamp);
     });
 
     it("Should trigger a ProfileCreated event when a user profile is created", async () => {
       await expect(
         profileContract.createProfile({
-          username: ethers.utils.formatBytes32String("ethernal"),
-          lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
-          discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
-          twitterHandle: ethers.utils.formatBytes32String("ethernal"),
-          email: ethers.utils.formatBytes32String("ethern@l.com"),
+          username: "ethernal",
+          lensHandle: "ethernal.lens",
+          discordHandle: "ethernal#1337",
+          twitterHandle: "ethernal",
+          email: "ethern@l.com",
           websiteUrl: websiteUrl,
           valid: true,
         })
       )
         .to.emit(profileContract, "ProfileCreated")
-        .withArgs(accounts[0].address, (await ethers.provider.getBlock("latest")).timestamp);
+        .withArgs(accounts[0].address, (await ethers.provider.getBlock("latest")).timestamp, "ethernal");
     });
 
     it("Should trigger a ProfileUpdated event when a user profile is updated", async () => {
       await expect(
         profileContract.updateProfile({
-          username: ethers.utils.formatBytes32String("ethernal"),
-          lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
-          discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
-          twitterHandle: ethers.utils.formatBytes32String("ethernal"),
-          email: ethers.utils.formatBytes32String("ethern@l.com"),
+          username: "ethernal",
+          lensHandle: "ethernal.lens",
+          discordHandle: "ethernal#1337",
+          twitterHandle: "ethernal",
+          email: "ethern@l.com",
           websiteUrl: websiteUrl,
           valid: true,
         })
@@ -174,47 +168,47 @@ describe("Profiles", async () => {
   describe("Update", async () => {
     it("Should update the profile's data correctly", async () => {
       const updateTx = await profileContract.updateProfile({
-        username: ethers.utils.formatBytes32String("ethernal"),
-        lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
-        discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
-        twitterHandle: ethers.utils.formatBytes32String("ethernal"),
-        email: ethers.utils.formatBytes32String("ethern@l.com"),
+        username: "ethernal",
+        lensHandle: "ethernal.lens",
+        discordHandle: "ethernal#1337",
+        twitterHandle: "ethernal",
+        email: "ethern@l.com",
         websiteUrl: "https://anon.mirror.xyz",
         valid: true,
       });
       await updateTx.wait();
       const profile = await profileContract.getProfile(accounts[0].address);
-      expect(await profile.username).to.eq(ethers.utils.formatBytes32String("ethernal"));
-      expect(await profile.lensHandle).to.eq(ethers.utils.formatBytes32String("ethernal.lens"));
-      expect(await profile.discordHandle).to.eq(ethers.utils.formatBytes32String("ethernal#1337"));
-      expect(await profile.twitterHandle).to.eq(ethers.utils.formatBytes32String("ethernal"));
-      expect(await profile.email).to.eq(ethers.utils.formatBytes32String("ethern@l.com"));
+      expect(await profile.username).to.eq("ethernal");
+      expect(await profile.lensHandle).to.eq("ethernal.lens");
+      expect(await profile.discordHandle).to.eq("ethernal#1337");
+      expect(await profile.twitterHandle).to.eq("ethernal");
+      expect(await profile.email).to.eq("ethern@l.com");
       expect(await profile.websiteUrl).to.eq("https://anon.mirror.xyz");
     });
 
     it("Should not update the profile's username if it's empty", async () => {
       const updateTx = await profileContract.updateProfile({
-        username: ethers.utils.formatBytes32String(""),
-        lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
-        discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
-        twitterHandle: ethers.utils.formatBytes32String("ethernal"),
-        email: ethers.utils.formatBytes32String("ethern@l.com"),
+        username: "",
+        lensHandle: "ethernal.lens",
+        discordHandle: "ethernal#1337",
+        twitterHandle: "ethernal",
+        email: "ethern@l.com",
         websiteUrl: "https://anon.mirror.xyz",
         valid: true,
       });
       await updateTx.wait();
       const profile = await profileContract.getProfile(accounts[0].address);
-      expect(await profile.username).to.not.eq(ethers.utils.formatBytes32String(""));
+      expect(await profile.username).to.not.eq("");
     });
 
     it("Should throw an error if the profile doesn't exist", async () => {
       await expect(
         profileContract.connect(accounts[1]).updateProfile({
-          username: ethers.utils.formatBytes32String("ethernal"),
-          lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
-          discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
-          twitterHandle: ethers.utils.formatBytes32String("ethernal"),
-          email: ethers.utils.formatBytes32String("ethern@l.com"),
+          username: "ethernal",
+          lensHandle: "ethernal.lens",
+          discordHandle: "ethernal#1337",
+          twitterHandle: "ethernal",
+          email: "ethern@l.com",
           websiteUrl: "https://anon.mirror.xyz",
           valid: true,
         })
@@ -229,22 +223,16 @@ describe("Profiles", async () => {
   describe("Blacklist", async () => {
     it("Should remove the user from the profiles list", async () => {
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(true);
-      const blacklistTx = await profileContract.blacklist(
-        accounts[0].address,
-        ethers.utils.formatBytes32String("Spam")
-      );
+      const blacklistTx = await profileContract.blacklist(accounts[0].address, "Spam");
       await blacklistTx.wait();
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(false);
     });
 
     it("Should give the reason of the blacklisting or throw an error if the address is not blacklisted", async () => {
-      const blacklistTx = await profileContract.blacklist(
-        accounts[0].address,
-        ethers.utils.formatBytes32String("Spam")
-      );
+      const blacklistTx = await profileContract.blacklist(accounts[0].address, "Spam");
       await blacklistTx.wait();
       const blacklistReason = await profileContract.getBlacklistReason(accounts[0].address);
-      expect(blacklistReason).to.eq(ethers.utils.formatBytes32String("Spam"));
+      expect(blacklistReason).to.eq("Spam");
       await expect(profileContract.getBlacklistReason(accounts[2].address)).to.be.revertedWithCustomError(
         errorsLib,
         "NotBlacklisted"
@@ -260,14 +248,15 @@ describe("Profiles", async () => {
 
     it("Should throw an error if the user is not an admin", async () => {
       await expect(
-        profileContract.connect(accounts[2]).blacklist(accounts[0].address, ethers.utils.formatBytes32String("Spam"))
+        profileContract.connect(accounts[2]).blacklist(accounts[0].address, "Spam")
       ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
 
     it("Should throw an error if the address is not in profiles list", async () => {
-      await expect(
-        profileContract.blacklist(accounts[2].address, ethers.utils.formatBytes32String("Spam"))
-      ).to.be.revertedWithCustomError(errorsLib, "NoProfileWithAddress");
+      await expect(profileContract.blacklist(accounts[2].address, "Spam")).to.be.revertedWithCustomError(
+        errorsLib,
+        "NoProfileWithAddress"
+      );
     });
   });
 
@@ -290,14 +279,15 @@ describe("Profiles", async () => {
     });
 
     it("Should throw an error if the profile by username doesn't exist", async () => {
-      await expect(
-        profileContract.getProfileByUsername(ethers.utils.formatBytes32String("afren"))
-      ).to.be.revertedWithCustomError(errorsLib, "NoProfileWithSocialHandle");
+      await expect(profileContract.getProfileByUsername("afren")).to.be.revertedWithCustomError(
+        errorsLib,
+        "NoProfileWithSocialHandle"
+      );
     });
 
     describe("Interfaces", async () => {
       it("Should support IAmpliFrensProfile", async () => {
-        expect(await profileContract.supportsInterface("0x342e7e87")).to.be.true;
+        expect(await profileContract.supportsInterface("0xbc10100c")).to.be.true;
       });
 
       it("Should support IERC165", async () => {

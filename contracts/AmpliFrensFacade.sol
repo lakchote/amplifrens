@@ -53,13 +53,8 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function checkUpkeep(bytes calldata) external view returns (bool upkeepNeeded, bytes memory) {
-        return (_sbt.isMintingIntervalMet(), "");
-    }
-
-    /// @inheritdoc IAmpliFrensFacade
-    function performUpkeep(bytes calldata) external whenNotPaused {
-        _sbt.mint(_contribution.topContribution());
+    function mintSBT(DataTypes.Contribution calldata contribution) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        _sbt.mint(contribution);
     }
 
     /// @inheritdoc IAmpliFrensFacade
@@ -83,7 +78,7 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function blacklistUserProfile(address _address, bytes32 reason)
+    function blacklistUserProfile(address _address, string calldata reason)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
         whenNotPaused
@@ -213,23 +208,13 @@ contract AmpliFrensFacade is Initializable, PausableUpgradeable, AccessControlUp
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function getProfileBlacklistReason(address _address) external view returns (bytes32) {
+    function getProfileBlacklistReason(address _address) external view returns (string memory) {
         return _profile.getBlacklistReason(_address);
     }
 
     /// @inheritdoc IAmpliFrensFacade
     function hasUserProfile(address _address) external view returns (bool) {
         return _profile.hasProfile(_address);
-    }
-
-    /// @inheritdoc IAmpliFrensFacade
-    function getContributions() external view returns (DataTypes.Contribution[] memory) {
-        return _contribution.getContributions();
-    }
-
-    /// @inheritdoc IAmpliFrensFacade
-    function topContribution() external view returns (DataTypes.Contribution memory) {
-        return _contribution.topContribution();
     }
 
     /// @inheritdoc IAmpliFrensFacade

@@ -14,6 +14,20 @@ import {Errors} from "../helpers/Errors.sol";
 library ContributionLogic {
     using Counters for Counters.Counter;
 
+    /// @dev See `IAmpliFrensContribution` for descriptions
+    event ContributionUpvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event ContributionDownvoted(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event ContributionUpdated(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event ContributionRemoved(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event ContributionCreated(
+        address indexed from,
+        uint256 contributionId,
+        uint256 timestamp,
+        DataTypes.ContributionCategory category,
+        string title,
+        string url
+    );
+
     /**
      * @notice Ensure that `msg.sender` is the contribution's author or he's the admin
      *
@@ -64,6 +78,8 @@ library ContributionLogic {
         container.upvoted[contributionId][msg.sender] = true;
         container.upvoterAddresses.push(msg.sender);
         container.upvotedIds.push(contributionId);
+
+        emit ContributionUpvoted(msg.sender, contributionId, block.timestamp);
     }
 
     /**
@@ -82,6 +98,8 @@ library ContributionLogic {
         container.downvoted[contributionId][msg.sender] = true;
         container.downvoterAddresses.push(msg.sender);
         container.downvotedIds.push(contributionId);
+
+        emit ContributionDownvoted(msg.sender, contributionId, block.timestamp);
     }
 
     /**
@@ -98,6 +116,8 @@ library ContributionLogic {
     ) external isAuthorOrAdmin(container.adminAddress, container.contribution[contributionId].author) {
         delete (container.contribution[contributionId]);
         _contributionsCounter.decrement();
+
+        emit ContributionRemoved(msg.sender, contributionId, block.timestamp);
     }
 
     /**
@@ -112,19 +132,21 @@ library ContributionLogic {
     function update(
         uint256 contributionId,
         DataTypes.ContributionCategory category,
-        bytes32 title,
+        string calldata title,
         string calldata url,
         DataTypes.Contributions storage container
     ) external isAuthorOrAdmin(container.adminAddress, container.contribution[contributionId].author) {
         DataTypes.Contribution storage contribution = container.contribution[contributionId];
 
         contribution.category = category;
-        if (bytes1(title) != 0x00) {
+        if (bytes8(bytes(title)) != 0x00) {
             contribution.title = title;
         }
         if (bytes(url).length > 0) {
             contribution.url = url;
         }
+
+        emit ContributionUpdated(msg.sender, contributionId, block.timestamp);
     }
 
     /**
@@ -138,7 +160,7 @@ library ContributionLogic {
      */
     function create(
         DataTypes.ContributionCategory category,
-        bytes32 title,
+        string calldata title,
         string calldata url,
         DataTypes.Contributions storage container,
         Counters.Counter storage _contributionsCounter
@@ -148,34 +170,14 @@ library ContributionLogic {
             msg.sender,
             category,
             true,
-            uint64(block.timestamp),
+            block.timestamp,
             0,
             title,
             url
         );
         container.contribution[_contributionsCounter.current()] = contribution;
-    }
 
-    /**
-     * @notice Get all the contributions
-     *
-     * @param container Total contributions data
-     * @param _contributionsCounter Number of tokens emitted
-     * @return Total contributions of type `DataTypes.Contribution`
-     */
-    function getContributions(DataTypes.Contributions storage container, Counters.Counter storage _contributionsCounter)
-        external
-        view
-        returns (DataTypes.Contribution[] memory)
-    {
-        uint256 contributionsLength = _contributionsCounter.current();
-        DataTypes.Contribution[] memory contributions = new DataTypes.Contribution[](contributionsLength);
-
-        for (uint256 i = 0; i < contributionsLength; ++i) {
-            contributions[i] = container.contribution[i];
-        }
-
-        return contributions;
+        emit ContributionCreated(msg.sender, _contributionsCounter.current(), block.timestamp, category, title, url);
     }
 
     /**
@@ -191,32 +193,6 @@ library ContributionLogic {
         returns (DataTypes.Contribution memory)
     {
         return container.contribution[contributionId];
-    }
-
-    /**
-     * @notice Get the most upvoted contribution
-     *
-     * @param container Total contributions data
-     * @param _contributionsCounter Number of tokens emitted
-     * @return Contribution of type `DataTypes.Contribution`
-     */
-    function topContribution(DataTypes.Contributions storage container, Counters.Counter storage _contributionsCounter)
-        external
-        view
-        returns (DataTypes.Contribution memory)
-    {
-        int256 topVotes = 0;
-        uint256 topContributionId = 0;
-        uint256 contributionsLength = _contributionsCounter.current();
-
-        for (uint256 i = 1; i <= contributionsLength; ++i) {
-            if (int256(container.contribution[i].votes) > topVotes) {
-                topContributionId = i;
-                topVotes = container.contribution[i].votes;
-            }
-        }
-
-        return container.contribution[topContributionId];
     }
 
     /**

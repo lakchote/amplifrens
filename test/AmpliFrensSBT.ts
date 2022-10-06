@@ -431,7 +431,7 @@ describe("Soulbound Token", async () => {
   });
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensSBT", async () => {
-      expect(await sbtContract.supportsInterface("0x9f5fa79b")).to.be.true;
+      expect(await sbtContract.supportsInterface("0xd0822b0b")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

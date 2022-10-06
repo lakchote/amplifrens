@@ -9,7 +9,7 @@ describe("Contribution", async () => {
   let errorsLib: Errors;
 
   // The following consts will be used for default contribution params
-  const title = ethers.utils.formatBytes32String("Gud alpha , get latest WLs here");
+  const title = "Gud alpha , get latest WLs here";
   const contributionCategory = 7; // Misc category
   const url = "https://www.twitter.com/profile/alphaMaker";
 
@@ -33,7 +33,16 @@ describe("Contribution", async () => {
 
   describe("Creation", async () => {
     it("Should create a contribution successfully", async () => {
-      await expect(contributionContract.create(contributionCategory, title, url)).to.not.be.reverted;
+      await expect(contributionContract.create(contributionCategory, title, url))
+        .to.emit(contributionContract, "ContributionCreated")
+        .withArgs(
+          accounts[0].address,
+          1,
+          (await (await ethers.provider.getBlock("latest")).timestamp) + 1,
+          contributionCategory,
+          title,
+          url
+        );
     });
 
     it("Should update the contributions count", async () => {
@@ -46,7 +55,7 @@ describe("Contribution", async () => {
   });
 
   describe("Update", async () => {
-    const newTitle = ethers.utils.formatBytes32String("Contribution updated");
+    const newTitle = "Contribution updated";
     const newUrl = "https://www.test.com";
     const newCategory = 2;
 
@@ -58,8 +67,9 @@ describe("Contribution", async () => {
     it("Should update a contribution by its id", async () => {
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.title).to.eq(title);
-      const updateTx = await contributionContract.update(1, newCategory, newTitle, newUrl);
-      await updateTx.wait();
+      await expect(contributionContract.update(1, newCategory, newTitle, newUrl))
+        .to.emit(contributionContract, "ContributionUpdated")
+        .withArgs(accounts[0].address, 1, (await ethers.provider.getBlock("latest")).timestamp);
       contribution = await contributionContract.getContribution(1);
       expect(await contribution.category).to.eq(newCategory);
       expect(await contribution.title).to.eq(newTitle);
@@ -69,10 +79,10 @@ describe("Contribution", async () => {
     it("Should not update a contribution's title if it's empty", async () => {
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.title).to.eq(title);
-      const updateTx = await contributionContract.update(1, newCategory, ethers.utils.formatBytes32String(""), newUrl);
+      const updateTx = await contributionContract.update(1, newCategory, "", newUrl);
       await updateTx.wait();
       contribution = await contributionContract.getContribution(1);
-      expect(await contribution.title).to.not.eq(ethers.utils.formatBytes32String(""));
+      expect(await contribution.title).to.not.eq("");
     });
 
     it("Should not update a contribution's url if it's empty", async () => {
@@ -113,8 +123,9 @@ describe("Contribution", async () => {
     it("Should remove a contribution from the list", async () => {
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.title).to.eq(title);
-      const removeTx = await contributionContract.connect(accounts[1]).remove(1);
-      await removeTx.wait();
+      expect(await contributionContract.connect(accounts[1]).remove(1))
+        .to.emit(contributionContract, "ContributionUpdated")
+        .withArgs(accounts[0].address, 1, (await ethers.provider.getBlock("latest")).timestamp);
       await expect(contributionContract.getContribution(1)).to.be.revertedWithCustomError(errorsLib, "OutOfBounds");
     });
 
@@ -191,8 +202,9 @@ describe("Contribution", async () => {
     it("Should increase a contribution's votes on upvote", async () => {
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.votes).to.eq(10);
-      const voteTx = await contributionContract.connect(accounts[11]).upvote(1);
-      await voteTx.wait();
+      expect(await contributionContract.connect(accounts[11]).upvote(1))
+        .to.emit(contributionContract, "ContributionUpvoted")
+        .withArgs(accounts[11].address, 1, (await ethers.provider.getBlock("latest")).timestamp);
       contribution = await contributionContract.getContribution(1);
       expect(await contribution.votes).to.eq(11);
     });
@@ -200,8 +212,9 @@ describe("Contribution", async () => {
     it("Should decrease a contribution's votes on downvote", async () => {
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.votes).to.eq(10);
-      const voteTx = await contributionContract.connect(accounts[11]).downvote(1);
-      await voteTx.wait();
+      expect(await contributionContract.connect(accounts[11]).downvote(1))
+        .to.emit(contributionContract, "ContributionDownvoted")
+        .withArgs(accounts[11].address, 1, (await ethers.provider.getBlock("latest")).timestamp);
       contribution = await contributionContract.getContribution(1);
       expect(await contribution.votes).to.eq(9);
     });
@@ -237,19 +250,7 @@ describe("Contribution", async () => {
   });
 
   describe("Enumeration", async () => {
-    const titles = [
-      ethers.utils.formatBytes32String("A"),
-      ethers.utils.formatBytes32String("B"),
-      ethers.utils.formatBytes32String("C"),
-      ethers.utils.formatBytes32String("D"),
-      ethers.utils.formatBytes32String("E"),
-      ethers.utils.formatBytes32String("F"),
-      ethers.utils.formatBytes32String("G"),
-      ethers.utils.formatBytes32String("H"),
-      ethers.utils.formatBytes32String("I"),
-      ethers.utils.formatBytes32String("J"),
-      ethers.utils.formatBytes32String("K"),
-    ];
+    const titles = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"];
 
     beforeEach(async () => {
       for (let i = 1; i < 10; i++) {
@@ -258,39 +259,13 @@ describe("Contribution", async () => {
       }
     });
 
-    it("Should retrieve all contributions", async () => {
-      const contributions = await contributionContract.getContributions();
-      for (let i = 1; i <= contributions.length; i++) {
-        const contribution = await contributionContract.getContribution(i);
-        expect(await contribution.title).to.eq(titles[i]);
-      }
-      expect(contributions.length).to.eq(9);
-    });
-
     it("Should retrieve a contribution by its id", async () => {
-      const createTx = await contributionContract.create(
-        0,
-        ethers.utils.formatBytes32String("Alpha alert"),
-        "https://www.twitter.com/ElonSecretProject"
-      );
+      const createTx = await contributionContract.create(0, "Alpha alert", "https://www.twitter.com/ElonSecretProject");
       await createTx.wait();
       const contribution = await contributionContract.getContribution(10);
       expect(await contribution.category).to.eq(0);
-      expect(await contribution.title).to.eq(ethers.utils.formatBytes32String("Alpha alert"));
+      expect(await contribution.title).to.eq("Alpha alert");
       expect(await contribution.url).to.eq("https://www.twitter.com/ElonSecretProject");
-    });
-
-    it("Should give the most upvoted contribution", async () => {
-      for (let i = 1; i <= 5; i++) {
-        const voteTx = await contributionContract.connect(accounts[i]).upvote(2);
-        await voteTx.wait();
-      }
-      for (let i = 5; i <= 9; i++) {
-        const voteTx = await contributionContract.connect(accounts[i]).upvote(i);
-        await voteTx.wait();
-      }
-      const topContribution = await contributionContract.topContribution();
-      expect(topContribution.title).to.eq(titles[2]);
     });
 
     it("Should throw an error if the index if out of bounds", async () => {
@@ -300,7 +275,7 @@ describe("Contribution", async () => {
 
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensContribution", async () => {
-      expect(await contributionContract.supportsInterface("0x6597662d")).to.be.true;
+      expect(await contributionContract.supportsInterface("0x70f17b1f")).to.be.true;
     });
 
     it("Should support IERC165", async () => {
