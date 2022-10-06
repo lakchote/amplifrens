@@ -12,7 +12,7 @@ import "hardhat-gas-reporter";
 dotenv.config();
 
 /**
- * We can't load the task files that require typechain when it hasn't been created yet. or
+ * We can't load the task files that require typechain when it hasn't been created yet.
  * Otherwise an error will be thrown. 
  * We use the SKIP_LOAD env var to require it when everything has been created. 
  * See the logic in the compile script present in package.json to fully understand the logic beneath.
