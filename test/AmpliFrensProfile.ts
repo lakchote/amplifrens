@@ -20,45 +20,58 @@ describe("Profiles", async () => {
   beforeEach(async () => {
     accounts = await ethers.getSigners();
 
-    const profileLogicLib = await (await (await ethers.getContractFactory("ProfileLogic")).deploy()).deployed();
     const pseudoModifierLib = await (await (await ethers.getContractFactory("PseudoModifier")).deploy()).deployed();
+    const profileLogicLib = await (
+      await (
+        await ethers.getContractFactory("ProfileLogic", {
+          libraries: {
+            PseudoModifier: pseudoModifierLib.address,
+          },
+        })
+      ).deploy()
+    ).deployed();
     errorsLib = (await (await (await ethers.getContractFactory("Errors")).deploy()).deployed()) as Errors;
 
     const profileContractFactory = (await ethers.getContractFactory("AmpliFrensProfile", {
       libraries: {
         ProfileLogic: profileLogicLib.address,
-        PseudoModifier: pseudoModifierLib.address,
       },
     })) as AmpliFrensProfile__factory;
 
     // Should be the facade's address, test for this access control use case is in AmpliFrensFacade.ts
-    profileContract = await profileContractFactory.deploy(accounts[0].address);
+    profileContract = await profileContractFactory.deploy(accounts[0].address, accounts[0].address);
     await profileContract.deployed();
 
-    const createProfileTx = await profileContract.createProfile({
-      username: username,
-      lensHandle: lensHandle,
-      discordHandle: discordHandle,
-      twitterHandle: twitterHandle,
-      email: email,
-      websiteUrl: websiteUrl,
-      valid: true,
-    });
+    const createProfileTx = await profileContract.createProfile(
+      {
+        username: username,
+        lensHandle: lensHandle,
+        discordHandle: discordHandle,
+        twitterHandle: twitterHandle,
+        email: email,
+        websiteUrl: websiteUrl,
+        valid: true,
+      },
+      accounts[0].address
+    );
     await createProfileTx.wait();
   });
 
   describe("Creation", async () => {
     it("Should update the profiles count correctly", async () => {
       expect(await profileContract.profilesCount()).to.be.eq(1);
-      const createProfileTx = await profileContract.createProfile({
-        username: "abc",
-        lensHandle: "abc.lens",
-        discordHandle: "abc#1234",
-        twitterHandle: "abc",
-        email: "test@test.com",
-        websiteUrl: websiteUrl,
-        valid: true,
-      });
+      const createProfileTx = await profileContract.createProfile(
+        {
+          username: "abc",
+          lensHandle: "abc.lens",
+          discordHandle: "abc#1234",
+          twitterHandle: "abc",
+          email: "test@test.com",
+          websiteUrl: websiteUrl,
+          valid: true,
+        },
+        accounts[0].address
+      );
       await createProfileTx.wait();
       expect(await profileContract.profilesCount()).to.eq(2);
     });
@@ -69,74 +82,109 @@ describe("Profiles", async () => {
 
     it("Should throw an error if username is empty", async () => {
       await expect(
-        profileContract.createProfile({
-          username: "",
-          lensHandle: lensHandle,
-          discordHandle: discordHandle,
-          twitterHandle: twitterHandle,
-          email: email,
-          websiteUrl: websiteUrl,
-          valid: true,
-        })
+        profileContract.createProfile(
+          {
+            username: "",
+            lensHandle: lensHandle,
+            discordHandle: discordHandle,
+            twitterHandle: twitterHandle,
+            email: email,
+            websiteUrl: websiteUrl,
+            valid: true,
+          },
+          accounts[0].address
+        )
       ).to.be.revertedWithCustomError(errorsLib, "EmptyUsername");
     });
 
     it("Should throw an error if the username chosen already exists", async () => {
       await expect(
-        profileContract.createProfile({
-          username: username,
-          lensHandle: lensHandle,
-          discordHandle: discordHandle,
-          twitterHandle: twitterHandle,
-          email: email,
-          websiteUrl: websiteUrl,
-          valid: true,
-        })
+        profileContract.createProfile(
+          {
+            username: username,
+            lensHandle: lensHandle,
+            discordHandle: discordHandle,
+            twitterHandle: twitterHandle,
+            email: email,
+            websiteUrl: websiteUrl,
+            valid: true,
+          },
+          accounts[0].address
+        )
       ).to.be.revertedWithCustomError(errorsLib, "UsernameExist");
+    });
+
+    it("Should throw an error if an user tries to spoof the from address", async () => {
+      await expect(
+        profileContract.connect(accounts[2]).createProfile(
+          {
+            username: username,
+            lensHandle: lensHandle,
+            discordHandle: discordHandle,
+            twitterHandle: twitterHandle,
+            email: email,
+            websiteUrl: websiteUrl,
+            valid: true,
+          },
+          accounts[0].address
+        )
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
   });
 
   describe("Deletion", async () => {
     it("Should remove the address from the profiles list", async () => {
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(true);
-      const deleteTx = await profileContract.deleteProfile(accounts[0].address);
+      const deleteTx = await profileContract.deleteProfile(accounts[0].address, accounts[0].address);
       await deleteTx.wait();
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(false);
     });
 
     it("Should update the profiles count correctly", async () => {
       expect(await profileContract.profilesCount()).to.be.eq(1);
-      const deleteTx = await profileContract.deleteProfile(accounts[0].address);
+      const deleteTx = await profileContract.deleteProfile(accounts[0].address, accounts[0].address);
       await deleteTx.wait();
       expect(await profileContract.profilesCount()).to.be.eq(0);
     });
 
     it("Should throw an error if the address supplied doesn't exist in the profiles list", async () => {
-      await expect(profileContract.deleteProfile(accounts[2].address)).to.be.revertedWithCustomError(
-        errorsLib,
-        "NoProfileWithAddress"
-      );
+      await expect(
+        profileContract.deleteProfile(accounts[2].address, accounts[0].address)
+      ).to.be.revertedWithCustomError(errorsLib, "NoProfileWithAddress");
+    });
+
+    it("Should throw an error if the user is not an admin", async () => {
+      await expect(profileContract.deleteProfile(accounts[2].address, accounts[3].address)).to.be.reverted;
+    });
+
+    it("Should throw an error if an user tries to spoof the from address", async () => {
+      await expect(
+        profileContract.connect(accounts[2]).deleteProfile(accounts[0].address, accounts[0].address)
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
   });
 
   describe("Events", async () => {
     it("Should trigger a ProfileBlacklisted event when a user is blacklisted", async () => {
-      await expect(profileContract.blacklist(accounts[0].address, "Spam"))
+      await expect(profileContract.blacklist(accounts[0].address, accounts[0].address, "Spam"))
         .to.emit(profileContract, "ProfileBlacklisted")
         .withArgs(accounts[0].address, "Spam", (await ethers.provider.getBlock("latest")).timestamp);
     });
 
     it("Should trigger a ProfileCreated event when a user profile is created", async () => {
       await expect(
-        profileContract.createProfile({
-          username: "ethernal",
-          lensHandle: "ethernal.lens",
-          discordHandle: "ethernal#1337",
-          twitterHandle: "ethernal",
-          email: "ethern@l.com",
-          websiteUrl: websiteUrl,
-          valid: true,
-        })
+        profileContract.createProfile(
+          {
+            username: "ethernal",
+            lensHandle: "ethernal.lens",
+            discordHandle: "ethernal#1337",
+            twitterHandle: "ethernal",
+            email: "ethern@l.com",
+            websiteUrl: websiteUrl,
+            valid: true,
+          },
+          accounts[0].address
+        )
       )
         .to.emit(profileContract, "ProfileCreated")
         .withArgs(accounts[0].address, (await ethers.provider.getBlock("latest")).timestamp, "ethernal");
@@ -144,22 +192,25 @@ describe("Profiles", async () => {
 
     it("Should trigger a ProfileUpdated event when a user profile is updated", async () => {
       await expect(
-        profileContract.updateProfile({
-          username: "ethernal",
-          lensHandle: "ethernal.lens",
-          discordHandle: "ethernal#1337",
-          twitterHandle: "ethernal",
-          email: "ethern@l.com",
-          websiteUrl: websiteUrl,
-          valid: true,
-        })
+        profileContract.updateProfile(
+          {
+            username: "ethernal",
+            lensHandle: "ethernal.lens",
+            discordHandle: "ethernal#1337",
+            twitterHandle: "ethernal",
+            email: "ethern@l.com",
+            websiteUrl: websiteUrl,
+            valid: true,
+          },
+          accounts[0].address
+        )
       )
         .to.emit(profileContract, "ProfileUpdated")
-        .withArgs(accounts[0].address, (await ethers.provider.getBlock("latest")).timestamp);
+        .withArgs(accounts[0].address, "ethernal", (await ethers.provider.getBlock("latest")).timestamp);
     });
 
     it("Should trigger a ProfileDeleted event when a user profile is deleted", async () => {
-      await expect(profileContract.deleteProfile(accounts[0].address))
+      await expect(profileContract.deleteProfile(accounts[0].address, accounts[0].address))
         .to.emit(profileContract, "ProfileDeleted")
         .withArgs(accounts[0].address, (await ethers.provider.getBlock("latest")).timestamp);
     });
@@ -167,15 +218,18 @@ describe("Profiles", async () => {
 
   describe("Update", async () => {
     it("Should update the profile's data correctly", async () => {
-      const updateTx = await profileContract.updateProfile({
-        username: "ethernal",
-        lensHandle: "ethernal.lens",
-        discordHandle: "ethernal#1337",
-        twitterHandle: "ethernal",
-        email: "ethern@l.com",
-        websiteUrl: "https://anon.mirror.xyz",
-        valid: true,
-      });
+      const updateTx = await profileContract.updateProfile(
+        {
+          username: "ethernal",
+          lensHandle: "ethernal.lens",
+          discordHandle: "ethernal#1337",
+          twitterHandle: "ethernal",
+          email: "ethern@l.com",
+          websiteUrl: "https://anon.mirror.xyz",
+          valid: true,
+        },
+        accounts[0].address
+      );
       await updateTx.wait();
       const profile = await profileContract.getProfile(accounts[0].address);
       expect(await profile.username).to.eq("ethernal");
@@ -187,49 +241,85 @@ describe("Profiles", async () => {
     });
 
     it("Should not update the profile's username if it's empty", async () => {
-      const updateTx = await profileContract.updateProfile({
-        username: "",
-        lensHandle: "ethernal.lens",
-        discordHandle: "ethernal#1337",
-        twitterHandle: "ethernal",
-        email: "ethern@l.com",
-        websiteUrl: "https://anon.mirror.xyz",
-        valid: true,
-      });
-      await updateTx.wait();
-      const profile = await profileContract.getProfile(accounts[0].address);
-      expect(await profile.username).to.not.eq("");
-    });
-
-    it("Should throw an error if the profile doesn't exist", async () => {
-      await expect(
-        profileContract.connect(accounts[1]).updateProfile({
-          username: "ethernal",
+      const updateTx = await profileContract.updateProfile(
+        {
+          username: "",
           lensHandle: "ethernal.lens",
           discordHandle: "ethernal#1337",
           twitterHandle: "ethernal",
           email: "ethern@l.com",
           websiteUrl: "https://anon.mirror.xyz",
           valid: true,
-        })
+        },
+        accounts[0].address
+      );
+      await updateTx.wait();
+      const profile = await profileContract.getProfile(accounts[0].address);
+      expect(await profile.username).to.not.eq("");
+    });
+
+    it("Should not update the profile's username if it already exists", async () => {
+      await expect(
+        profileContract.updateProfile(
+          {
+            username: username,
+            lensHandle: "hacker.lens",
+            discordHandle: "hacker#1337",
+            twitterHandle: "hack3r",
+            email: "h@ck.com",
+            websiteUrl: "https://0xBADA55.xyz",
+            valid: true,
+          },
+          accounts[0].address
+        )
+      ).to.be.revertedWithCustomError(errorsLib, "UsernameExist");
+    });
+
+    it("Should throw an error if the profile doesn't exist", async () => {
+      await expect(
+        profileContract.updateProfile(
+          {
+            username: "ethernal",
+            lensHandle: "ethernal.lens",
+            discordHandle: "ethernal#1337",
+            twitterHandle: "ethernal",
+            email: "ethern@l.com",
+            websiteUrl: "https://anon.mirror.xyz",
+            valid: true,
+          },
+          accounts[1].address
+        )
       ).to.be.revertedWithCustomError(errorsLib, "NoProfileWithAddress");
     });
 
-    it("Should throw an error if the user is not an admin", async () => {
-      await expect(profileContract.deleteProfile(accounts[2].address)).to.be.reverted;
+    it("Should throw an error if an user tries to spoof the from address", async () => {
+      await expect(
+        profileContract.connect(accounts[2]).updateProfile(
+          {
+            username: username,
+            lensHandle: lensHandle,
+            discordHandle: discordHandle,
+            twitterHandle: twitterHandle,
+            email: email,
+            websiteUrl: websiteUrl,
+            valid: true,
+          },
+          accounts[0].address
+        )
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
   });
 
   describe("Blacklist", async () => {
     it("Should remove the user from the profiles list", async () => {
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(true);
-      const blacklistTx = await profileContract.blacklist(accounts[0].address, "Spam");
+      const blacklistTx = await profileContract.blacklist(accounts[0].address, accounts[0].address, "Spam");
       await blacklistTx.wait();
       expect(await profileContract.hasProfile(accounts[0].address)).to.eq(false);
     });
 
     it("Should give the reason of the blacklisting or throw an error if the address is not blacklisted", async () => {
-      const blacklistTx = await profileContract.blacklist(accounts[0].address, "Spam");
+      const blacklistTx = await profileContract.blacklist(accounts[0].address, accounts[0].address, "Spam");
       await blacklistTx.wait();
       const blacklistReason = await profileContract.getBlacklistReason(accounts[0].address);
       expect(blacklistReason).to.eq("Spam");
@@ -241,22 +331,27 @@ describe("Profiles", async () => {
 
     it("Should update the profiles count correctly", async () => {
       expect(await profileContract.profilesCount()).to.be.eq(1);
-      const deleteTx = await profileContract.deleteProfile(accounts[0].address);
+      const deleteTx = await profileContract.deleteProfile(accounts[0].address, accounts[0].address);
       await deleteTx.wait();
       expect(await profileContract.profilesCount()).to.be.eq(0);
     });
 
     it("Should throw an error if the user is not an admin", async () => {
       await expect(
-        profileContract.connect(accounts[2]).blacklist(accounts[0].address, "Spam")
+        profileContract.blacklist(accounts[0].address, accounts[2].address, "Spam")
       ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
 
     it("Should throw an error if the address is not in profiles list", async () => {
-      await expect(profileContract.blacklist(accounts[2].address, "Spam")).to.be.revertedWithCustomError(
-        errorsLib,
-        "NoProfileWithAddress"
-      );
+      await expect(
+        profileContract.blacklist(accounts[2].address, accounts[0].address, "Spam")
+      ).to.be.revertedWithCustomError(errorsLib, "NoProfileWithAddress");
+    });
+
+    it("Should throw an error if an user tries to spoof the from address", async () => {
+      await expect(
+        profileContract.connect(accounts[2]).blacklist(accounts[0].address, accounts[0].address, "Spam")
+      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
     });
   });
 
@@ -287,7 +382,7 @@ describe("Profiles", async () => {
 
     describe("Interfaces", async () => {
       it("Should support IAmpliFrensProfile", async () => {
-        expect(await profileContract.supportsInterface("0xbc10100c")).to.be.true;
+        expect(await profileContract.supportsInterface("0xae6a2c09")).to.be.true;
       });
 
       it("Should support IERC165", async () => {

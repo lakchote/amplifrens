@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {IAmpliFrensContribution} from "./interfaces/IAmpliFrensContribution.sol";
 import {DataTypes} from "./libraries/types/DataTypes.sol";
-import {PseudoModifier} from "./libraries/guards/PseudoModifier.sol";
 import {ContributionLogic} from "./libraries/logic/ContributionLogic.sol";
 
 /**
@@ -19,33 +18,33 @@ contract AmpliFrensContribution is IERC165, IAmpliFrensContribution {
     using Counters for Counters.Counter;
 
     Counters.Counter private _contributionsCounter;
+    Counters.Counter private _daysCounter;
 
     DataTypes.Contributions internal contributions;
 
-    address public immutable facadeProxy;
+    address private immutable adminAddress;
+    address private immutable facadeProxyAddress;
 
-    /// @dev Contract initialization with facade's proxy address precomputed
-    constructor(address _facadeProxy) {
-        facadeProxy = _facadeProxy;
-        contributions.adminAddress = _facadeProxy;
+    /// @dev Contract initialization
+    constructor(address _adminAddress, address _facadeProxyAddress) {
+        adminAddress = _adminAddress;
+        facadeProxyAddress = _facadeProxyAddress;
+        _daysCounter.increment();
     }
 
     /// @inheritdoc IAmpliFrensContribution
-    function upvote(uint256 contributionId) external {
-        PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
-        ContributionLogic.upvote(contributionId, contributions);
+    function upvote(uint256 contributionId, address from) external {
+        ContributionLogic.upvote(contributionId, from, contributions);
     }
 
     /// @inheritdoc IAmpliFrensContribution
-    function downvote(uint256 contributionId) external {
-        PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
-        ContributionLogic.downvote(contributionId, contributions);
+    function downvote(uint256 contributionId, address from) external {
+        ContributionLogic.downvote(contributionId, from, contributions);
     }
 
     /// @inheritdoc IAmpliFrensContribution
-    function remove(uint256 contributionId) external {
-        PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
-        ContributionLogic.remove(contributionId, contributions, _contributionsCounter);
+    function remove(uint256 contributionId, address from) external {
+        ContributionLogic.remove(contributionId, from, adminAddress, contributions, _contributionsCounter);
     }
 
     /// @inheritdoc IAmpliFrensContribution
@@ -53,31 +52,49 @@ contract AmpliFrensContribution is IERC165, IAmpliFrensContribution {
         uint256 contributionId,
         DataTypes.ContributionCategory category,
         string calldata title,
-        string calldata url
+        string calldata url,
+        address from
     ) external {
-        PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
-        ContributionLogic.update(contributionId, category, title, url, contributions);
+        ContributionLogic.update(contributionId, category, title, url, from, adminAddress, contributions);
     }
 
     /// @inheritdoc IAmpliFrensContribution
     function create(
         DataTypes.ContributionCategory category,
         string calldata title,
-        string calldata url
+        string calldata url,
+        address from
     ) external {
-        ContributionLogic.create(category, title, url, contributions, _contributionsCounter);
+        ContributionLogic.create(
+            category,
+            title,
+            url,
+            from,
+            facadeProxyAddress,
+            contributions,
+            _contributionsCounter,
+            _daysCounter.current()
+        );
     }
 
     /// @inheritdoc IAmpliFrensContribution
-    function reset() external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
-        ContributionLogic.reset(contributions, _contributionsCounter);
+    function reset(address from) external {
+        ContributionLogic.reset(from, adminAddress, contributions, _contributionsCounter, _daysCounter);
+    }
+
+    /// @inheritdoc IAmpliFrensContribution
+    function incrementDayCounter() external {
+        ContributionLogic.incrementDayCounter(_daysCounter, facadeProxyAddress);
     }
 
     /// @inheritdoc IAmpliFrensContribution
     function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory) {
-        PseudoModifier.isNotOutOfBounds(contributionId, _contributionsCounter);
-        return ContributionLogic.getContribution(contributionId, contributions);
+        return ContributionLogic.getContribution(contributionId, contributions, _contributionsCounter);
+    }
+
+    /// @inheritdoc IAmpliFrensContribution
+    function topContribution() external view returns (DataTypes.Contribution memory) {
+        return ContributionLogic.topContribution(_daysCounter.current(), _daysCounter, contributions);
     }
 
     /// @inheritdoc IAmpliFrensContribution

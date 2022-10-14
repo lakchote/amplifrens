@@ -22,10 +22,13 @@ interface IAmpliFrensFacade {
     function mintSBT(DataTypes.Contribution calldata contribution) external;
 
     /**
-     * /////////////////////////////////////////////////////
-     * @dev Start of Soulbound token (SBT) related functions
-     * /////////////////////////////////////////////////////
+     * Revoke the SBT with id `tokenId`
      *
+     * @param tokenId The token id to revoke
+     */
+    function revokeSBT(uint256 tokenId) external;
+
+    /**
      * @notice Set the Soulbound token base URI
      *
      * @param uri The new base uri for the Soulbound tokens
@@ -62,6 +65,13 @@ interface IAmpliFrensFacade {
      * @return Number of tokens owned by `owner`
      */
     function balanceOfSBT(address _address) external view returns (uint256);
+
+    /**
+     * @notice Check if minting interval has been met
+     *
+     * @return True or false
+     */
+    function isMintingIntervalMet() external view returns (bool);
 
     /**
      * @notice Get the owner of a soulbound oken
@@ -154,11 +164,17 @@ interface IAmpliFrensFacade {
     function downvoteContribution(uint256 contributionId) external;
 
     /**
-     * @notice Post the contribution with id `contributionId`
+     * @notice Post a contribution
      *
-     * @param contribution Contribution containing data of type `DataTypes.Contribution`
+     * @param category The contribution's category
+     * @param title The contribution's title
+     * @param url The contribution's url
      */
-    function createContribution(DataTypes.Contribution calldata contribution) external;
+    function createContribution(
+        DataTypes.ContributionCategory category,
+        string calldata title,
+        string calldata url
+    ) external;
 
     /**
      * @notice Remove the contribution with id `contributionId`
@@ -171,9 +187,16 @@ interface IAmpliFrensFacade {
      * @notice Update the contribution with id `contributionId`
      *
      * @param contributionId The contribution id to update
-     * @param contribution The updated contribution data
+     * @param category The contribution's updated category
+     * @param title The contribution's updated title
+     * @param url The contribution's updated url
      */
-    function updateContribution(uint256 contributionId, DataTypes.Contribution calldata contribution) external;
+    function updateContribution(
+        uint256 contributionId,
+        DataTypes.ContributionCategory category,
+        string calldata title,
+        string calldata url
+    ) external;
 
     /// @notice Reset the contributions
     function resetContributions() external;

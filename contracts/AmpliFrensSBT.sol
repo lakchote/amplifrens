@@ -5,10 +5,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {SBTLogic} from "./libraries/logic/SBTLogic.sol";
-import {PseudoModifier} from "./libraries/guards/PseudoModifier.sol";
 import {IAmpliFrensSBT} from "./interfaces/IAmpliFrensSBT.sol";
 import {DataTypes} from "./libraries/types/DataTypes.sol";
-import {TokenURI} from "./libraries/helpers/TokenURI.sol";
 import {Status} from "./libraries/helpers/Status.sol";
 
 /**
@@ -24,7 +22,7 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
-    /// @dev See struct's description above
+    /// @dev See struct `DataTypes.MintingInterval` description
     DataTypes.MintingInterval public mintingParams;
 
     /// @dev Number of tokens emitted
@@ -40,23 +38,27 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
     mapping(address => uint256) private _validTokensForAddress;
 
     /// @dev Base Token URI for metadata
-    string public baseURI;
+    DataTypes.URIStorage public uriStorage;
+
     string public constant SBT_TOKEN_NAME = "AmpliFrens Contribution Award";
     string public constant SBT_TOKEN_SYMBOL = "AFRENCONTRIBUTION";
 
-    address public immutable facadeProxy;
+    address private immutable adminAddress;
+    address private immutable facadeProxyAddress;
 
-    /// @dev Contract initialization with facade's proxy address precomputed
-    constructor(address _facadeProxy) {
+    /// @dev Contract initialization
+    constructor(address _adminAddress, address _facadeProxyAddress) {
         mintingParams.lastBlockTimestamp = block.timestamp;
         mintingParams.mintInterval = 1 days;
-        facadeProxy = _facadeProxy;
+        adminAddress = _adminAddress;
+        facadeProxyAddress = _facadeProxyAddress;
     }
 
     /// @inheritdoc IAmpliFrensSBT
     function mint(DataTypes.Contribution calldata contribution) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
         SBTLogic.mint(
+            msg.sender,
+            facadeProxyAddress,
             contribution,
             _tokens,
             _tokensForAddress,
@@ -68,16 +70,13 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
     }
 
     /// @inheritdoc IAmpliFrensSBT
-    function revoke(uint256 tokenId) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
-        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
-        SBTLogic.revoke(tokenId, _tokens, _validTokensForAddress);
+    function revoke(uint256 tokenId, address from) external {
+        SBTLogic.revoke(tokenId, from, adminAddress, _tokenIdCounter, _tokens, _validTokensForAddress);
     }
 
     /// @inheritdoc IAmpliFrensSBT
-    function setBaseURI(string calldata uri) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
-        baseURI = uri;
+    function setBaseURI(string calldata uri, address from) external {
+        SBTLogic.setBaseURI(uriStorage, uri, from, adminAddress);
     }
 
     /// @inheritdoc IAmpliFrensSBT
@@ -92,16 +91,12 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
 
     /// @inheritdoc IAmpliFrensSBT
     function ownerOf(uint256 tokenId) external view returns (address owner) {
-        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
-
-        return SBTLogic.ownerOf(tokenId, _tokens);
+        return SBTLogic.ownerOf(tokenId, _tokenIdCounter, _tokens);
     }
 
     /// @inheritdoc IAmpliFrensSBT
     function isValid(uint256 tokenId) external view returns (bool) {
-        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
-
-        return SBTLogic.isValid(tokenId, _tokens);
+        return SBTLogic.isValid(tokenId, _tokenIdCounter, _tokens);
     }
 
     /// @inheritdoc IAmpliFrensSBT
@@ -121,16 +116,12 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
 
     /// @inheritdoc IAmpliFrensSBT
     function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256) {
-        PseudoModifier.isNotOutOfBounds(index, _tokenIdCounter);
-
-        return SBTLogic.tokenOfOwnerByIndex(owner, index, _tokensForAddress);
+        return SBTLogic.tokenOfOwnerByIndex(owner, index, _tokenIdCounter, _tokensForAddress);
     }
 
     /// @inheritdoc IAmpliFrensSBT
     function tokenById(uint256 id) external view returns (DataTypes.Contribution memory) {
-        PseudoModifier.isNotOutOfBounds(id, _tokenIdCounter);
-
-        return SBTLogic.tokenById(id, _tokens);
+        return SBTLogic.tokenById(id, _tokenIdCounter, _tokens);
     }
 
     /// @inheritdoc IAmpliFrensSBT
@@ -153,9 +144,7 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
      * @param tokenId The token id to retrieve the URI
      */
     function tokenURI(uint256 tokenId) external view returns (string memory uri) {
-        PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
-
-        uri = TokenURI.concatBaseURITokenIdJsonExt(tokenId, baseURI);
+        uri = SBTLogic.tokenURI(uriStorage.baseURI, tokenId, _tokenIdCounter);
     }
 
     /// @inheritdoc IAmpliFrensSBT

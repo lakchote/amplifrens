@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import { HardhatUserConfig } from "hardhat/config";
 import glob from "glob";
 import path from "path";
 import "@nomicfoundation/hardhat-toolbox";
@@ -8,13 +7,14 @@ import "@nomiclabs/hardhat-solhint";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
+import "@graphprotocol/hardhat-graph";
 
 dotenv.config();
 
 /**
  * We can't load the task files that require typechain when it hasn't been created yet.
- * Otherwise an error will be thrown. 
- * We use the SKIP_LOAD env var to require it when everything has been created. 
+ * Otherwise an error will be thrown.
+ * We use the SKIP_LOAD env var to require it when everything has been created.
  * See the logic in the compile script present in package.json to fully understand the logic beneath.
  */
 if (!process.env.SKIP_LOAD) {
@@ -32,7 +32,7 @@ const {
   DEPLOYER_WALLET_PRIVATE_KEY,
 } = process.env;
 
-const config: HardhatUserConfig = {
+const config = {
   networks: {
     mumbai: {
       url: POLYGON_MUMBAI_RPC_PROVIDER,
@@ -42,6 +42,10 @@ const config: HardhatUserConfig = {
       url: POLYGON_MAINNET_RPC_PROVIDER,
       accounts: [DEPLOYER_WALLET_PRIVATE_KEY!],
     },
+    localhost: {
+      url: "http://localhost:8545",
+    },
+    hardhat: {},
   },
   solidity: {
     version: "0.8.16",
@@ -63,6 +67,12 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: POLYGONSCAN_API_KEY,
+  },
+  subgraph: {
+    name: "amplifrens",
+  },
+  paths: {
+    subgraph: "./subgraph",
   },
 };
 

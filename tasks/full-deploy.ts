@@ -15,7 +15,7 @@ task("full-deploy", "Deploy the entire AmpliFrens contracts")
     let deployer = undefined;
     let admin = undefined;
     let ipfsPath = undefined;
-    if (hre.network.name === "hardhat") {
+    if (["hardhat", "localhost"].includes(hre.network.name)) {
       const accounts = await ethers.getSigners();
       deployer = accounts[0];
       admin = accounts[1];
@@ -36,20 +36,42 @@ task("full-deploy", "Deploy the entire AmpliFrens contracts")
     }
 
     console.log("Deploying libraries...");
-    console.log("Deploying ContributionLogic library...");
-    const contributionLogicLib = await (
-      await (await ethers.getContractFactory("ContributionLogic")).deploy()
-    ).deployed();
-    console.log("Deploying ProfileLogic library...");
-    const profileLogicLib = await (await (await ethers.getContractFactory("ProfileLogic")).deploy()).deployed();
-    console.log("Deploying SBTLogic library...");
-    const sbtLogicLib = await (await (await ethers.getContractFactory("SBTLogic")).deploy()).deployed();
     console.log("Deploying TokenURI library...");
     const tokenURIHelperLib = await (await (await ethers.getContractFactory("TokenURI")).deploy()).deployed();
     console.log("Deploying PseudoModifier library...");
     const pseudoModifierLib = await (await (await ethers.getContractFactory("PseudoModifier")).deploy()).deployed();
     console.log("Deploying Status library...");
     const statusLib = await (await (await ethers.getContractFactory("Status")).deploy()).deployed();
+
+    console.log("Deploying SBTLogic library...");
+    const sbtLogicLib = await (
+      await (
+        await ethers.getContractFactory("SBTLogic", {
+          libraries: { TokenURI: tokenURIHelperLib.address, PseudoModifier: pseudoModifierLib.address },
+        })
+      ).deploy()
+    ).deployed();
+
+    console.log("Deploying ContributionLogic library...");
+    const contributionLogicLib = await (
+      await (
+        await ethers.getContractFactory("ContributionLogic", {
+          libraries: {
+            PseudoModifier: pseudoModifierLib.address,
+          },
+        })
+      ).deploy()
+    ).deployed();
+    console.log("Deploying ProfileLogic library...");
+    const profileLogicLib = await (
+      await (
+        await ethers.getContractFactory("ProfileLogic", {
+          libraries: {
+            PseudoModifier: pseudoModifierLib.address,
+          },
+        })
+      ).deploy()
+    ).deployed();
 
     // 0 = NFT
     // 1 = SBT
@@ -68,36 +90,35 @@ task("full-deploy", "Deploy the entire AmpliFrens contracts")
         PseudoModifier: pseudoModifierLib.address,
       },
     });
-    const nftContract = await (await nftContractFactory.deploy(facadeProxyAddress)).deployed();
+    const nftContract = await (await nftContractFactory.deploy(admin.address)).deployed();
 
     console.log("Deploying AmpliFrensSBT...");
     const sbtContractFactory = await ethers.getContractFactory("AmpliFrensSBT", {
       libraries: {
         SBTLogic: sbtLogicLib.address,
-        TokenURI: tokenURIHelperLib.address,
-        PseudoModifier: pseudoModifierLib.address,
         Status: statusLib.address,
       },
     });
-    const sbtContract = await (await sbtContractFactory.deploy(facadeProxyAddress)).deployed();
+    const sbtContract = await (await sbtContractFactory.deploy(admin.address, facadeProxyAddress)).deployed();
 
     console.log("Deploying AmpliFrensProfile...");
     const profileContractFactory = await ethers.getContractFactory("AmpliFrensProfile", {
       libraries: {
         ProfileLogic: profileLogicLib.address,
-        PseudoModifier: pseudoModifierLib.address,
       },
     });
-    const profileContract = await (await profileContractFactory.deploy(facadeProxyAddress)).deployed();
+    const profileContract = await (await profileContractFactory.deploy(admin.address, facadeProxyAddress)).deployed();
 
     console.log("Deploying AmpliFrensContribution...");
     const contributionContractFactory = await ethers.getContractFactory("AmpliFrensContribution", {
       libraries: {
-        PseudoModifier: pseudoModifierLib.address,
         ContributionLogic: contributionLogicLib.address,
       },
     });
-    const contributionContract = await (await contributionContractFactory.deploy(facadeProxyAddress)).deployed();
+
+    const contributionContract = await (
+      await contributionContractFactory.deploy(admin.address, facadeProxyAddress)
+    ).deployed();
 
     console.log("Deploying AmpliFrensFacade Impl...");
     const facadeImplContractFactory = await ethers.getContractFactory("AmpliFrensFacade");
@@ -118,9 +139,6 @@ task("full-deploy", "Deploy the entire AmpliFrens contracts")
         facadeImplContract.interface.encodeFunctionData("initialize", [admin.address])
       )
     ).deployed();
-
-    console.log(facadeProxyAddress);
-    console.log(proxy.address);
 
     const addresses = {
       libraries: {

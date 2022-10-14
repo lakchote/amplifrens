@@ -21,11 +21,11 @@ describe("Facade", async () => {
   let accounts: SignerWithAddress[];
 
   const profileCallData = {
-    username: ethers.utils.formatBytes32String("ethernal"),
-    lensHandle: ethers.utils.formatBytes32String("ethernal.lens"),
-    discordHandle: ethers.utils.formatBytes32String("ethernal#1337"),
-    twitterHandle: ethers.utils.formatBytes32String("ethernal"),
-    email: ethers.utils.formatBytes32String("ethern@l.com"),
+    username: "ethernal",
+    lensHandle: "ethernal.lens",
+    discordHandle: "ethernal#1337",
+    twitterHandle: "ethernal",
+    email: "ethern@l.com",
     websiteUrl: "https://www.anon.xyz",
     valid: true,
   };
@@ -36,6 +36,7 @@ describe("Facade", async () => {
     valid: true,
     timestamp: "1665077937",
     votes: 20,
+    dayCounter: 1,
     title: "Excellent opportunity of a WL",
     url: "https://www.twitter.com/XX/status/1337",
   };
@@ -83,6 +84,19 @@ describe("Facade", async () => {
     });
   });
 
+  describe("Keeper", async () => {
+    it("It should forward to IAmpliFrensSBT to check if upkeep is needed", async () => {
+      const isUpkeepNeeded = await facadeProxyContract.checkUpkeep(ethers.utils.formatBytes32String("0x"));
+      await expect(isUpkeepNeeded[0]).to.eq(true);
+    });
+    it("It should forward to IAmpliFrensSBT to perform upkeep", async () => {
+      await expect(await facadeProxyContract.performUpkeep(ethers.utils.formatBytes32String("0x"))).to.emit(
+        sbtContract,
+        "SBTContract"
+      );
+    });
+  });
+
   describe("NFT", async () => {
     it("Should forward to IAmpliFrensNFT to mint NFT", async () => {
       await expect(await facadeProxyContract.mintNFT(accounts[2].address, "1")).to.emit(nftContract, "NFTContract");
@@ -112,6 +126,15 @@ describe("Facade", async () => {
       await expect(await facadeProxyContract.mintSBT(contributionCalldata)).to.emit(sbtContract, "SBTContract");
     });
 
+    it("Should forward to IAmpliFrensSBT to revoke SBT tokens", async () => {
+      await expect(await facadeProxyContract.revokeSBT(1)).to.emit(sbtContract, "SBTContract");
+    });
+
+    it("Should forward to IAmpliFrensSBT to check if minting interval is met", async () => {
+      // in the mock, isMintingInterval() returns true
+      await expect(await facadeProxyContract.isMintingIntervalMet()).to.eq(true);
+    });
+
     it("Should forward to IAmpliFrensSBT to set SBT base URI", async () => {
       await expect(await facadeProxyContract.setSBTBaseURI("https://www.amplifrens.xyz")).to.emit(
         sbtContract,
@@ -120,7 +143,7 @@ describe("Facade", async () => {
     });
 
     it("Should forward to IAmpliFrensSBT to retrieve a SBT token", async () => {
-      // in the mock, tokenById() return 1337 votes
+      // in the mock, tokenById() returns 1337 votes
       const contribution = await facadeProxyContract.getSBTById(0);
       expect(contribution.votes).to.eq(1337);
     });
@@ -221,31 +244,17 @@ describe("Facade", async () => {
     });
 
     it("Should forward to IAmpliFrensContribution to create contribution", async () => {
-      await expect(
-        await facadeProxyContract.createContribution({
-          category: 1,
-          title: ethers.utils.formatBytes32String("This is awesome"),
-          url: "https://messari.io/report/ratio-finance-collateralized-debt-positions-on-solana",
-          author: accounts[0].address,
-          valid: true,
-          timestamp: 1664347831,
-          votes: 0,
-        })
-      ).to.emit(contributionContract, "ContributionContract");
+      await expect(await facadeProxyContract.createContribution(1, "Vitalik new project", "https://www.x.xyz")).to.emit(
+        contributionContract,
+        "ContributionContract"
+      );
     });
 
     it("Should forward to IAmpliFrensContribution to update contribution", async () => {
-      await expect(
-        await facadeProxyContract.updateContribution(0, {
-          category: 1,
-          title: ethers.utils.formatBytes32String("This is awesome"),
-          url: "https://messari.io/report/ratio-finance-collateralized-debt-positions-on-solana",
-          author: accounts[0].address,
-          valid: true,
-          timestamp: 1664347831,
-          votes: 0,
-        })
-      ).to.emit(contributionContract, "ContributionContract");
+      await expect(await facadeProxyContract.updateContribution(1, 1, "New title", "https://www.newurl.xyz")).to.emit(
+        contributionContract,
+        "ContributionContract"
+      );
     });
 
     it("Should forward to IAmpliFrensContribution to remove contribution", async () => {
@@ -296,26 +305,10 @@ describe("Facade", async () => {
       await expect(facadeProxyContract.downvoteContribution(1)).to.be.revertedWith("Pausable: paused");
       await expect(facadeProxyContract.removeContribution(1)).to.be.revertedWith("Pausable: paused");
       await expect(
-        facadeProxyContract.updateContribution(1, {
-          category: 1,
-          title: ethers.utils.formatBytes32String("This is awesome"),
-          url: "https://messari.io/report/ratio-finance-collateralized-debt-positions-on-solana",
-          author: accounts[0].address,
-          valid: true,
-          timestamp: 1664347831,
-          votes: 0,
-        })
+        facadeProxyContract.updateContribution(1, 4, "Binance bridge hack explanation", "https//www.dummy.xyz")
       ).to.be.revertedWith("Pausable: paused");
       await expect(
-        facadeProxyContract.createContribution({
-          category: 1,
-          title: ethers.utils.formatBytes32String("This is awesome"),
-          url: "https://messari.io/report/ratio-finance-collateralized-debt-positions-on-solana",
-          author: accounts[0].address,
-          valid: true,
-          timestamp: 1664347831,
-          votes: 0,
-        })
+        facadeProxyContract.createContribution(4, "Binance bridge hack explanation", "https//www.dummy.xyz")
       ).to.be.revertedWith("Pausable: paused");
       await expect(
         facadeProxyContract.mintNFT("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "https://www.amplifrens.xyz")
@@ -346,35 +339,16 @@ describe("Facade", async () => {
         facadeProxyContract.deleteUserProfile("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
       ).to.not.be.revertedWith("Pausable: paused");
       await expect(
-        facadeProxyContract.blacklistUserProfile(
-          "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-          ethers.utils.formatBytes32String("Spam")
-        )
+        facadeProxyContract.blacklistUserProfile("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "Spam")
       ).to.not.be.revertedWith("Pausable: paused");
       await expect(facadeProxyContract.upvoteContribution(1)).to.not.be.revertedWith("Pausable: paused");
       await expect(facadeProxyContract.downvoteContribution(1)).to.not.be.revertedWith("Pausable: paused");
       await expect(facadeProxyContract.removeContribution(1)).to.not.be.revertedWith("Pausable: paused");
       await expect(
-        facadeProxyContract.updateContribution(1, {
-          category: 1,
-          title: ethers.utils.formatBytes32String("This is awesome"),
-          url: "https://messari.io/report/ratio-finance-collateralized-debt-positions-on-solana",
-          author: accounts[0].address,
-          valid: true,
-          timestamp: 1664347831,
-          votes: 0,
-        })
+        facadeProxyContract.updateContribution(1, 4, "Binance bridge hack explanation", "https//www.dummy.xyz")
       ).to.not.be.revertedWith("Pausable: paused");
       await expect(
-        facadeProxyContract.createContribution({
-          category: 1,
-          title: ethers.utils.formatBytes32String("This is awesome"),
-          url: "https://messari.io/report/ratio-finance-collateralized-debt-positions-on-solana",
-          author: accounts[0].address,
-          valid: true,
-          timestamp: 1664347831,
-          votes: 0,
-        })
+        facadeProxyContract.createContribution(4, "Binance bridge hack explanation", "https//www.dummy.xyz")
       ).to.not.be.revertedWith("Pausable: paused");
       await expect(
         facadeProxyContract.mintNFT("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "https://www.amplifrens.xyz")
@@ -398,7 +372,7 @@ describe("Facade", async () => {
       await expect(
         facadeProxyContract
           .connect(accounts[2])
-          .blacklistUserProfile("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", ethers.utils.formatBytes32String("Spam"))
+          .blacklistUserProfile("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "Spam")
       ).to.be.reverted;
       await expect(facadeProxyContract.connect(accounts[2]).resetContributions()).to.be.reverted;
       await expect(
@@ -418,7 +392,7 @@ describe("Facade", async () => {
 
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensFacade", async () => {
-      expect(await facadeProxyContract.supportsInterface("0x17e06ecd")).to.be.true;
+      expect(await facadeProxyContract.supportsInterface("0xf8a21ae9")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {IAmpliFrensProfile} from "./interfaces/IAmpliFrensProfile.sol";
 import {DataTypes} from "./libraries/types/DataTypes.sol";
 import {ProfileLogic} from "./libraries/logic/ProfileLogic.sol";
-import {PseudoModifier} from "./libraries/guards/PseudoModifier.sol";
 
 /**
  * @title AmpliFrensProfile
@@ -24,32 +23,46 @@ contract AmpliFrensProfile is IERC165, IAmpliFrensProfile {
 
     Counters.Counter public profilesCount;
 
-    address public immutable facadeProxy;
+    address private immutable adminAddress;
+    address private immutable facadeProxyAddress;
 
-    /// @dev Contract initialization with facade's proxy address precomputed
-    constructor(address _facadeProxy) {
-        facadeProxy = _facadeProxy;
+    /// @dev Contract initialization
+    constructor(address _adminAddress, address _facadeProxyAddress) {
+        adminAddress = _adminAddress;
+        facadeProxyAddress = _facadeProxyAddress;
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function blacklist(address _address, string calldata reason) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
-        ProfileLogic.blackList(_address, reason, _blacklistedAddresses, _profiles, profilesCount);
+    function blacklist(
+        address _address,
+        address from,
+        string calldata reason
+    ) external {
+        ProfileLogic.blackList(
+            _address,
+            from,
+            adminAddress,
+            facadeProxyAddress,
+            reason,
+            _blacklistedAddresses,
+            _profiles,
+            profilesCount
+        );
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function createProfile(DataTypes.Profile calldata profile) external {
-        ProfileLogic.createProfile(profile, _profiles, _usernames, profilesCount);
+    function createProfile(DataTypes.Profile calldata profile, address from) external {
+        ProfileLogic.createProfile(profile, from, facadeProxyAddress, _profiles, _usernames, profilesCount);
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function deleteProfile(address _address) external {
-        ProfileLogic.deleteProfile(_address, _profiles, profilesCount);
+    function deleteProfile(address _address, address from) external {
+        ProfileLogic.deleteProfile(_address, from, adminAddress, facadeProxyAddress, _profiles, profilesCount);
     }
 
     /// @inheritdoc IAmpliFrensProfile
-    function updateProfile(DataTypes.Profile calldata profile) external {
-        ProfileLogic.updateProfile(profile, _profiles, _usernames);
+    function updateProfile(DataTypes.Profile calldata profile, address from) external {
+        ProfileLogic.updateProfile(profile, from, facadeProxyAddress, _profiles, _usernames);
     }
 
     /// @inheritdoc IAmpliFrensProfile

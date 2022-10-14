@@ -33,4 +33,28 @@ library PseudoModifier {
     function isNotOutOfBounds(uint256 index, Counters.Counter storage counter) external view {
         if (index > counter.current() || index == 0) revert Errors.OutOfBounds();
     }
+
+    /**
+     * @notice Ensure that `from` is the contribution's author or he's the admin
+     *
+     * @param admin The admin's address
+     * @param author The contribution's author address
+     * @param from  The address `from` who initiated the transaction
+     */
+    function isAuthorOrAdmin(
+        address admin,
+        address author,
+        address from
+    ) external pure {
+        if (author != from && admin != from) revert Errors.Unauthorized();
+    }
+
+    /**
+     * @notice Ensure that the sender of the transaction is the facade contract
+     *
+     * @dev Prevent spoofing address `from`
+     */
+    function isFacadeCall(address facadeProxyAddress, address from) external pure {
+        if (facadeProxyAddress != from) revert Errors.Unauthorized();
+    }
 }

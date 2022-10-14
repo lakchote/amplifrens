@@ -10,29 +10,15 @@ contract AmpliFrensContributionFacadeMock is IAmpliFrensContribution {
 
     event ContributionContract();
 
-    constructor() {
-        contributions.push(
-            DataTypes.Contribution(
-                address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045),
-                DataTypes.ContributionCategory(7),
-                true,
-                1664280770,
-                1337,
-                "You won't believe this WL",
-                "https://notboredapeyachtclub.com/whitelist"
-            )
-        );
-    }
-
-    function upvote(uint256) external override {
+    function upvote(uint256, address) external override {
         emit ContributionContract();
     }
 
-    function downvote(uint256) external override {
+    function downvote(uint256, address) external override {
         emit ContributionContract();
     }
 
-    function remove(uint256) external override {
+    function remove(uint256, address) external override {
         emit ContributionContract();
     }
 
@@ -40,7 +26,8 @@ contract AmpliFrensContributionFacadeMock is IAmpliFrensContribution {
         uint256,
         DataTypes.ContributionCategory,
         string calldata,
-        string calldata
+        string calldata,
+        address
     ) external override {
         emit ContributionContract();
     }
@@ -48,12 +35,13 @@ contract AmpliFrensContributionFacadeMock is IAmpliFrensContribution {
     function create(
         DataTypes.ContributionCategory,
         string calldata,
-        string calldata
+        string calldata,
+        address
     ) external override {
         emit ContributionContract();
     }
 
-    function reset() external override {
+    function reset(address) external override {
         emit ContributionContract();
     }
 
@@ -65,12 +53,29 @@ contract AmpliFrensContributionFacadeMock is IAmpliFrensContribution {
                 true,
                 1664280770,
                 1337,
+                1,
                 "You won't believe this WL",
                 "https://notboredapeyachtclub.com/whitelist"
+            );
+    }
+
+    function topContribution() external pure returns (DataTypes.Contribution memory) {
+        return
+            DataTypes.Contribution(
+                address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045),
+                DataTypes.ContributionCategory(7),
+                true,
+                1664280770,
+                1337,
+                1,
+                "The best contribution",
+                "https://ethereum.org/en/whitepaper"
             );
     }
 
     function contributionsCount() external pure override returns (uint256) {
         return 31337;
     }
+
+    function incrementDayCounter() external pure {}
 }
