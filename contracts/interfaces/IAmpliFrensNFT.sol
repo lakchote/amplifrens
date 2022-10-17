@@ -17,8 +17,13 @@ interface IAmpliFrensNFT is IERC721, IERC721Metadata {
      *
      * @param to The address to mint the NFT
      * @param uri The URI of the NFT
+     * @param from The address `from` who initiated the transaction
      */
-    function mint(address to, string memory uri) external;
+    function mint(
+        address to,
+        string memory uri,
+        address from
+    ) external;
 
     /**
      * @notice Transfer an NFT from address `from` to address `to`
@@ -26,11 +31,13 @@ interface IAmpliFrensNFT is IERC721, IERC721Metadata {
      * @param from The current owner's address for the NFT
      * @param to The new owner's address for the NFT
      * @param tokenId The token id to transfer
+     * @param sender  The address `sender` who initiated the transaction
      */
     function transferNFT(
         address from,
         address to,
-        uint256 tokenId
+        uint256 tokenId,
+        address sender
     ) external;
 
     /**
@@ -40,13 +47,19 @@ interface IAmpliFrensNFT is IERC721, IERC721Metadata {
      *
      * @param receiver The address to receive royalty fees
      * @param feeNumerator The royalty fee
+     * @param from The address `from` who initiated the transaction
      */
-    function setDefaultRoyalty(address receiver, uint96 feeNumerator) external;
+    function setDefaultRoyalty(
+        address receiver,
+        uint96 feeNumerator,
+        address from
+    ) external;
 
     /**
      * @notice Set the base URI `uri` for tokens, it should end with a "/"
      *
      * @param uri The base URI
+     * @param from The address `from` who initiated the transaction
      */
-    function setBaseURI(string calldata uri) external;
+    function setBaseURI(string calldata uri, address from) external;
 }

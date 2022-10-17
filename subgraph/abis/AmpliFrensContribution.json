@@ -1,0 +1,350 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_adminAddress", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "_facadeProxyAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum DataTypes.ContributionCategory",
+        "name": "category",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "url",
+        "type": "string"
+      }
+    ],
+    "name": "ContributionCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "ContributionDownvoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "ContributionRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum DataTypes.ContributionCategory",
+        "name": "category",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "url",
+        "type": "string"
+      }
+    ],
+    "name": "ContributionUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "ContributionUpvoted",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "contributionsCount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum DataTypes.ContributionCategory",
+        "name": "category",
+        "type": "uint8"
+      },
+      { "internalType": "string", "name": "title", "type": "string" },
+      { "internalType": "string", "name": "url", "type": "string" },
+      { "internalType": "address", "name": "from", "type": "address" }
+    ],
+    "name": "create",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      { "internalType": "address", "name": "from", "type": "address" }
+    ],
+    "name": "downvote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "contributionId", "type": "uint256" }
+    ],
+    "name": "getContribution",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "enum DataTypes.ContributionCategory",
+            "name": "category",
+            "type": "uint8"
+          },
+          { "internalType": "bool", "name": "valid", "type": "bool" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+          { "internalType": "uint256", "name": "votes", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "dayCounter",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "url", "type": "string" }
+        ],
+        "internalType": "struct DataTypes.Contribution",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "incrementDayCounter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      { "internalType": "address", "name": "from", "type": "address" }
+    ],
+    "name": "remove",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "from", "type": "address" }
+    ],
+    "name": "reset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }
+    ],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "topContribution",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "enum DataTypes.ContributionCategory",
+            "name": "category",
+            "type": "uint8"
+          },
+          { "internalType": "bool", "name": "valid", "type": "bool" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+          { "internalType": "uint256", "name": "votes", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "dayCounter",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "url", "type": "string" }
+        ],
+        "internalType": "struct DataTypes.Contribution",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum DataTypes.ContributionCategory",
+        "name": "category",
+        "type": "uint8"
+      },
+      { "internalType": "string", "name": "title", "type": "string" },
+      { "internalType": "string", "name": "url", "type": "string" },
+      { "internalType": "address", "name": "from", "type": "address" }
+    ],
+    "name": "update",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      },
+      { "internalType": "address", "name": "from", "type": "address" }
+    ],
+    "name": "upvote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

@@ -25,26 +25,31 @@ const url = "https://www.twitter.com/profile/alphaMaker";
 
 describe("Soulbound Token", async () => {
   beforeEach(async () => {
-    const sbtLogicLib = await (await (await ethers.getContractFactory("SBTLogic")).deploy()).deployed();
     const tokenURIHelperLib = await (await (await ethers.getContractFactory("TokenURI")).deploy()).deployed();
     const pseudoModifierLib = await (await (await ethers.getContractFactory("PseudoModifier")).deploy()).deployed();
     const statusLib = await (await (await ethers.getContractFactory("Status")).deploy()).deployed();
     errorsLib = (await (await (await ethers.getContractFactory("Errors")).deploy()).deployed()) as Errors;
 
+    const sbtLogicLib = await (
+      await (
+        await ethers.getContractFactory("SBTLogic", {
+          libraries: { TokenURI: tokenURIHelperLib.address, PseudoModifier: pseudoModifierLib.address },
+        })
+      ).deploy()
+    ).deployed();
+
     const sbtContractFactory = await ethers.getContractFactory("AmpliFrensSBT", {
       libraries: {
         SBTLogic: sbtLogicLib.address,
-        TokenURI: tokenURIHelperLib.address,
-        PseudoModifier: pseudoModifierLib.address,
         Status: statusLib.address,
       },
     });
     accounts = await ethers.getSigners();
 
-    sbtContract = (await sbtContractFactory.deploy(accounts[0].address)) as AmpliFrensSBT;
+    sbtContract = (await sbtContractFactory.deploy(accounts[0].address, accounts[0].address)) as AmpliFrensSBT;
     await sbtContract.deployed();
     increaseTime();
-    const setBaseURITx = await sbtContract.setBaseURI("https://www.example.com/");
+    const setBaseURITx = await sbtContract.setBaseURI("https://www.example.com/", accounts[0].address);
     await setBaseURITx.wait();
 
     const mintTx = await sbtContract.mint({
@@ -53,6 +58,7 @@ describe("Soulbound Token", async () => {
       valid: true,
       timestamp: timestamp,
       votes: votes,
+      dayCounter: 1,
       title: title,
       url: url,
     });
@@ -75,6 +81,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         })
@@ -89,6 +96,7 @@ describe("Soulbound Token", async () => {
         valid: true,
         timestamp: timestamp,
         votes: 500,
+        dayCounter: 1,
         title: title,
         url: url,
       });
@@ -101,20 +109,6 @@ describe("Soulbound Token", async () => {
       increaseTime();
       expect(await sbtContract.isMintingIntervalMet()).to.eq(true);
     });
-    it("Should be called by admin role only", async () => {
-      increaseTime();
-      await expect(
-        sbtContract.connect(accounts[1]).mint({
-          author: accounts[1].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          title: title,
-          url: url,
-        })
-      ).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
-    });
 
     describe("Enumeration", async () => {
       it("Should increase the tokens emitted count", async () => {
@@ -125,6 +119,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -152,6 +147,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -163,6 +159,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -180,6 +177,7 @@ describe("Soulbound Token", async () => {
             valid: true,
             timestamp: timestamp,
             votes: 500,
+            dayCounter: 1,
             title: title,
             url: url,
           });
@@ -192,6 +190,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -225,6 +224,7 @@ describe("Soulbound Token", async () => {
         valid: true,
         timestamp: timestamp,
         votes: 500,
+        dayCounter: 1,
         title: title,
         url: url,
       });
@@ -240,6 +240,7 @@ describe("Soulbound Token", async () => {
         valid: true,
         timestamp: timestamp,
         votes: 500,
+        dayCounter: 1,
         title: title,
         url: url,
       });
@@ -254,31 +255,37 @@ describe("Soulbound Token", async () => {
 
   describe("Revocation", async () => {
     it("Should identify a token as invalid if it has been revoked", async () => {
-      const revokeTx = await sbtContract.revoke(1);
+      const revokeTx = await sbtContract.revoke(1, accounts[0].address);
       revokeTx.wait();
       expect(await sbtContract.isValid(1)).to.be.false;
     });
 
     it("Should decrease the total tokens counter for address after a revocation", async () => {
       expect(await sbtContract.hasValid(accounts[1].address)).to.be.true;
-      const revokeTx = await sbtContract.revoke(1);
+      const revokeTx = await sbtContract.revoke(1, accounts[0].address);
       revokeTx.wait();
       expect(await sbtContract.balanceOf(accounts[1].address)).to.be.eq(0);
     });
 
     it("Should properly check if an address owns a valid token", async () => {
       expect(await sbtContract.hasValid(accounts[1].address)).to.be.true;
-      const revokeTx = await sbtContract.revoke(1);
+      const revokeTx = await sbtContract.revoke(1, accounts[0].address);
       revokeTx.wait();
       expect(await sbtContract.hasValid(accounts[1].address)).to.be.false;
     });
 
     it("Should be called by admin role only", async () => {
-      await expect(sbtContract.connect(accounts[1]).revoke(1)).to.be.revertedWithCustomError(errorsLib, "Unauthorized");
+      await expect(sbtContract.connect(accounts[1]).revoke(1, accounts[3].address)).to.be.revertedWithCustomError(
+        errorsLib,
+        "Unauthorized"
+      );
     });
 
     it("Should revert if the token id for revocation is out of bounds", async () => {
-      await expect(sbtContract.revoke(1337)).to.be.revertedWithCustomError(errorsLib, "OutOfBounds");
+      await expect(sbtContract.revoke(1337, accounts[0].address)).to.be.revertedWithCustomError(
+        errorsLib,
+        "OutOfBounds"
+      );
     });
   });
   describe("Metadata", async () => {
@@ -298,6 +305,7 @@ describe("Soulbound Token", async () => {
         valid: true,
         timestamp: timestamp,
         votes: 500,
+        dayCounter: 1,
         title: title,
         url: url,
       });
@@ -312,7 +320,7 @@ describe("Soulbound Token", async () => {
 
     it("Should change the base URI correctly", async () => {
       increaseTime();
-      const setTokenURITx = await sbtContract.setBaseURI("https://www.amplifrens.xyz/");
+      const setTokenURITx = await sbtContract.setBaseURI("https://www.amplifrens.xyz/", accounts[0].address);
       await setTokenURITx.wait();
       const mintTx = await sbtContract.mint({
         author: accounts[1].address,
@@ -320,6 +328,7 @@ describe("Soulbound Token", async () => {
         valid: true,
         timestamp: timestamp,
         votes: 500,
+        dayCounter: 1,
         title: title,
         url: url,
       });
@@ -347,6 +356,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -363,6 +373,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -379,6 +390,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -395,6 +407,7 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         });
@@ -405,7 +418,7 @@ describe("Soulbound Token", async () => {
   });
 
   describe("Events", async () => {
-    it("Should emit a Minted event when a token is minted", async () => {
+    it("Should emit events when a token is minted", async () => {
       increaseTime();
       await expect(
         sbtContract.mint({
@@ -414,24 +427,35 @@ describe("Soulbound Token", async () => {
           valid: true,
           timestamp: timestamp,
           votes: 500,
+          dayCounter: 1,
           title: title,
           url: url,
         })
       )
-        .to.emit(sbtContract, "Minted")
-        .withArgs(accounts[1].address, 2, await (await ethers.provider.getBlock("latest")).timestamp);
+        .to.emit(sbtContract, "SBTMinted")
+        .withArgs(accounts[1].address, 2, await (await ethers.provider.getBlock("latest")).timestamp)
+        .to.emit(sbtContract, "SBTBestContribution")
+        .withArgs(
+          accounts[1].address,
+          await (
+            await ethers.provider.getBlock("latest")
+          ).timestamp,
+          contributionCategory,
+          title,
+          url
+        );
     });
 
     it("Should emit a Revoked event when a token is revoked", async () => {
       increaseTime();
-      await expect(sbtContract.revoke(1))
-        .to.emit(sbtContract, "Revoked")
+      await expect(sbtContract.revoke(1, accounts[0].address))
+        .to.emit(sbtContract, "SBTRevoked")
         .withArgs(accounts[1].address, 1, await (await ethers.provider.getBlock("latest")).timestamp);
     });
   });
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensSBT", async () => {
-      expect(await sbtContract.supportsInterface("0xd0822b0b")).to.be.true;
+      expect(await sbtContract.supportsInterface("0xce80ad3b")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

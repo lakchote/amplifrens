@@ -17,7 +17,10 @@ task("mint-nfts", "Mint NFTs for address specified")
     if (!ethers.utils.isAddress(args.proxy)) {
       console.error(`The proxy address ${args.address} is not a valid.`);
     }
-    const signer = new ethers.Wallet(process.env.ADMIN_WALLET_PRIVATE_KEY!, ethers.provider);
+
+    const signer = ["hardhat", "localhost"].includes(hre.network.name)
+      ? (await ethers.getSigners())[1]
+      : new ethers.Wallet(process.env.ADMIN_WALLET_PRIVATE_KEY!, ethers.provider);
 
     const proxyContract = new ethers.Contract(args.proxy, facadeJson.abi, signer) as IAmpliFrensFacade;
 

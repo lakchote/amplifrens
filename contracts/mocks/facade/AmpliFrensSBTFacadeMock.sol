@@ -12,11 +12,11 @@ contract AmpliFrensSBTFacadeMock is IAmpliFrensSBT {
         emit SBTContract();
     }
 
-    function revoke(uint256) external override {
+    function revoke(uint256, address) external override {
         emit SBTContract();
     }
 
-    function setBaseURI(string calldata) external {
+    function setBaseURI(string calldata, address) external {
         emit SBTContract();
     }
 
@@ -66,6 +66,7 @@ contract AmpliFrensSBTFacadeMock is IAmpliFrensSBT {
                 true,
                 1664280770,
                 1337,
+                1,
                 "You won't believe this WL",
                 "https://notboredapeyachtclub.com/whitelist"
             );

@@ -29,7 +29,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
 
     uint256 public constant MAX_SUPPLY = 15;
     string public baseURI;
-    address public immutable facadeProxy;
+    address private immutable adminAddress;
 
     /// @dev Guard to ensure supply limit is enforced
     modifier hasSupply() {
@@ -48,18 +48,24 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
     }
 
     /// @dev Contract initialization with facade's proxy address precomputed
-    constructor(address _facadeProxy) ERC721("AmpliFrens", "AFREN") {
-        facadeProxy = _facadeProxy;
+    constructor(address _adminAddress) ERC721("AmpliFrens", "AFREN") {
+        adminAddress = _adminAddress;
     }
 
     /**
      * @notice Mint the token to address `to` with URI `uri``
      *
      * @param to The recipient of the token
+     * @param from  The address `from` who initiated the transaction
      * @param uri The URI of the token
      */
-    function mint(address to, string memory uri) external hasSupply {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
+    function mint(
+        address to,
+        string memory uri,
+        address from
+    ) external hasSupply {
+        PseudoModifier.addressEq(adminAddress, from);
+
         _tokenIdCounter.increment();
         uint256 tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
@@ -68,19 +74,32 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
 
     /**
      * @notice Transfer the NFT with id `tokenId` from address `from` to address `to`
+     *
+     * @param from The current owner of the NFT
+     * @param to The new owner fo the NFT
+     * @param sender  The address `from` who initiated the transaction
+     * @param tokenId The token id to transfer
      */
     function transferNFT(
         address from,
         address to,
-        uint256 tokenId
+        uint256 tokenId,
+        address sender
     ) external isNotAlreadyOwner(to) {
+        PseudoModifier.addressEq(sender, adminAddress);
+
         ownerAddresses[to] = true;
         ERC721.safeTransferFrom(from, to, tokenId);
     }
 
     /// @inheritdoc IAmpliFrensNFT
-    function setDefaultRoyalty(address receiver, uint96 feeNumerator) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
+    function setDefaultRoyalty(
+        address receiver,
+        uint96 feeNumerator,
+        address from
+    ) external {
+        PseudoModifier.addressEq(adminAddress, from);
+
         if (receiver == address(0)) {
             revert Errors.AddressNull();
         }
@@ -93,8 +112,9 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
     }
 
     /// @inheritdoc IAmpliFrensNFT
-    function setBaseURI(string calldata uri) external {
-        PseudoModifier.addressEq(facadeProxy, msg.sender);
+    function setBaseURI(string calldata uri, address from) external {
+        PseudoModifier.addressEq(adminAddress, from);
+
         baseURI = uri;
     }
 
@@ -106,6 +126,7 @@ contract AmpliFrensNFT is ERC721, ERC721Royalty, ERC721URIStorage, IAmpliFrensNF
         returns (string memory uri)
     {
         PseudoModifier.isNotOutOfBounds(tokenId, _tokenIdCounter);
+
         uri = TokenURI.concatBaseURITokenIdJsonExt(tokenId, baseURI);
     }
 

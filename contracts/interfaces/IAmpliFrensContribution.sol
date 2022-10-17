@@ -31,11 +31,21 @@ interface IAmpliFrensContribution {
     /**
      * @notice Event that is emitted when a contribution is updated
      *
-     * @param from The address who updated
+     * @param from The address who created the contribution
      * @param contributionId The id of the contribution
-     * @param timestamp The time of the update
+     * @param timestamp The time of the creation
+     * @param category The contribution category
+     * @param title The title of the contribution
+     * @param url The URL of the contribution
      */
-    event ContributionUpdated(address indexed from, uint256 indexed contributionId, uint256 timestamp);
+    event ContributionUpdated(
+        address indexed from,
+        uint256 contributionId,
+        uint256 timestamp,
+        DataTypes.ContributionCategory category,
+        string title,
+        string url
+    );
 
     /**
      * @notice Event that is emitted when a contribution is removed
@@ -69,22 +79,25 @@ interface IAmpliFrensContribution {
      * @notice Upvote the contribution with id `contributionId`
      *
      * @param contributionId The contribution to upvote
+     * @param from  The address `from` who initiated the transaction
      */
-    function upvote(uint256 contributionId) external;
+    function upvote(uint256 contributionId, address from) external;
 
     /**
      * @notice Downvote the contribution with id `contributionId`
      *
      * @param contributionId The contribution id to downvote
+     * @param from  The address `from` who initiated the transaction
      */
-    function downvote(uint256 contributionId) external;
+    function downvote(uint256 contributionId, address from) external;
 
     /**
      * @notice Remove the contribution with id `contributionId`
      *
      * @param contributionId The contribution id to delete
+     * @param from  The address `from` who initiated the transaction
      */
-    function remove(uint256 contributionId) external;
+    function remove(uint256 contributionId, address from) external;
 
     /**
      * @notice Update the contribution with id `contributionId`
@@ -93,12 +106,14 @@ interface IAmpliFrensContribution {
      * @param category The contribution's updated category
      * @param title The contribution's updated title
      * @param url The contribution's updated url
+     * @param from  The address `from` who initiated the transaction
      */
     function update(
         uint256 contributionId,
         DataTypes.ContributionCategory category,
         string calldata title,
-        string calldata url
+        string calldata url,
+        address from
     ) external;
 
     /**
@@ -107,23 +122,42 @@ interface IAmpliFrensContribution {
      * @param category The contribution's category
      * @param title The contribution's title
      * @param url The contribution's url
+     * @param from  The address `from` who initiated the transaction
      */
     function create(
         DataTypes.ContributionCategory category,
         string calldata title,
-        string calldata url
+        string calldata url,
+        address from
     ) external;
 
-    /// @notice Reset the contributions
-    function reset() external;
+    /**
+     * @notice Reset the contributions
+     *
+     * @param from  The address `from` who initiated the transaction
+     */
+    function reset(address from) external;
+
+    /**
+     * @notice Increment total days elapsed since contract's creation by 1
+     */
+    function incrementDayCounter() external;
 
     /**
      * @notice Get the contribution with id `contributionId`
      *
      * @param contributionId The id of the contribution to retrieve
+     *
      * @return Contribution with id `contributionId` of type `DataTypes.Contribution`
      */
     function getContribution(uint256 contributionId) external view returns (DataTypes.Contribution memory);
+
+    /**
+     * @notice Retrieve the most upvoted contribution for the current day
+     *
+     * @return The most upvoted contribution
+     */
+    function topContribution() external view returns (DataTypes.Contribution memory);
 
     /**
      * @notice Return the total number of contributions

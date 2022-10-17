@@ -41,9 +41,29 @@ library DataTypes {
         ContributionCategory category; /// @dev 1 byte
         bool valid; /// @dev 1 byte
         uint256 timestamp; /// @dev 32 bytes
-        int256 votes; /// @dev 32 bytes
+        uint256 votes;
+        uint256 dayCounter;
         string title;
         string url;
+    }
+
+    /**
+     * @notice Contain contributions data
+     *
+     * @dev address[] && uint256[] are used to iterate over upvoted/downvoted mappings for reset function
+     */
+    struct Contributions {
+        mapping(uint256 => mapping(uint256 => DataTypes.Contribution)) dayContributions;
+        mapping(uint256 => uint256[]) dayContributionsIds;
+        mapping(uint256 => uint256) totalDayContributions;
+        mapping(uint256 => bool) validContributionIds;
+        mapping(uint256 => DataTypes.Contribution) contribution;
+        mapping(uint256 => mapping(address => bool)) upvoted;
+        mapping(uint256 => mapping(address => bool)) downvoted;
+        address[] upvoterAddresses;
+        address[] downvoterAddresses;
+        uint256[] upvotedIds;
+        uint256[] downvotedIds;
     }
 
     /**
@@ -72,18 +92,9 @@ library DataTypes {
     }
 
     /**
-     * @notice Contain contributions data
-     *
-     * @dev address[] && uint256[] are used to iterate over upvoted/downvoted mappings
+     * @notice Contain token's URI data
      */
-    struct Contributions {
-        mapping(uint256 => DataTypes.Contribution) contribution;
-        mapping(uint256 => mapping(address => bool)) upvoted;
-        mapping(uint256 => mapping(address => bool)) downvoted;
-        address[] upvoterAddresses;
-        address[] downvoterAddresses;
-        uint256[] upvotedIds;
-        uint256[] downvotedIds;
-        address adminAddress;
+    struct URIStorage {
+        string baseURI;
     }
 }

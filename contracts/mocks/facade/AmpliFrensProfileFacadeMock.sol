@@ -8,7 +8,7 @@ import "../../interfaces/IAmpliFrensProfile.sol";
 contract AmpliFrensProfileFacadeMock is IAmpliFrensProfile {
     event ProfileContract();
 
-    function createProfile(DataTypes.Profile calldata) external override {
+    function createProfile(DataTypes.Profile calldata, address) external override {
         emit ProfileContract();
     }
 
@@ -25,15 +25,19 @@ contract AmpliFrensProfileFacadeMock is IAmpliFrensProfile {
             );
     }
 
-    function updateProfile(DataTypes.Profile calldata) external override {
+    function updateProfile(DataTypes.Profile calldata, address) external override {
         emit ProfileContract();
     }
 
-    function deleteProfile(address) external override {
+    function deleteProfile(address, address) external override {
         emit ProfileContract();
     }
 
-    function blacklist(address, string calldata) external override {
+    function blacklist(
+        address,
+        address,
+        string calldata
+    ) external override {
         emit ProfileContract();
     }
 

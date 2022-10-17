@@ -17,7 +17,7 @@ interface IAmpliFrensProfile {
      * @param reason   The reason of the blacklist
      * @param timestamp The time when blacklisting occured
      */
-    event ProfileBlacklisted(address _address, string indexed reason, uint256 timestamp);
+    event ProfileBlacklisted(address _address, string reason, uint256 timestamp);
 
     /**
      * @notice Event that is emitted when a profile is created
@@ -32,9 +32,10 @@ interface IAmpliFrensProfile {
      * @notice Event that is emitted when a profile is updated
      *
      * @param _address The profile's address updated
+     * @param username The updated profile's username
      * @param timestamp The time when profile update occurred
      */
-    event ProfileUpdated(address indexed _address, uint256 timestamp);
+    event ProfileUpdated(address indexed _address, string username, uint256 timestamp);
 
     /**
      * @notice Event that is emitted when a profile is deleted
@@ -44,25 +45,28 @@ interface IAmpliFrensProfile {
     event ProfileDeleted(address indexed _address, uint256 timestamp);
 
     /**
-     * @notice Create a profile for address `msg.sender`
+     * @notice Create a profile for address `from`
      *
      * @param profile `DataTypes.Profile` containing the profile data
+     * @param from  The address `from` who initiated the transaction
      */
-    function createProfile(DataTypes.Profile calldata profile) external;
+    function createProfile(DataTypes.Profile calldata profile, address from) external;
 
     /**
-     * @notice Update a profile for address `msg.sender`
+     * @notice Update a profile for address `from`
      *
      * @param profile `DataTypes.Profile` containing the profile data
+     * @param from  The address `from` who initiated the transaction
      */
-    function updateProfile(DataTypes.Profile calldata profile) external;
+    function updateProfile(DataTypes.Profile calldata profile, address from) external;
 
     /**
      * @notice Delete the profile of address `_address`
      *
      * @param _address The address's profile to delete
+     * @param from  The address `from` who initiated the transaction
      */
-    function deleteProfile(address _address) external;
+    function deleteProfile(address _address, address from) external;
 
     /**
      * @notice Get a profile if applicable for address `_address`
@@ -75,9 +79,14 @@ interface IAmpliFrensProfile {
      * @notice Blacklist a profile with address `_address` for reason `reason`
      *
      * @param _address The profile's address to blacklist
+     * @param from  The address `from` who initiated the transaction
      * @param reason The reason of the blacklist
      */
-    function blacklist(address _address, string calldata reason) external;
+    function blacklist(
+        address _address,
+        address from,
+        string calldata reason
+    ) external;
 
     /**
      * @notice Get the blacklist reason for address `_address`

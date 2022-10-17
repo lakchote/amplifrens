@@ -17,8 +17,13 @@ gas_report*.txt
 # NFTs metadata
 nfts/metadata
 
-# Deployment contract addresses
-addresses.json
+# Subgraph
+subgraph/generated
+subgraph/build
+subgraph/tests
+
+# Docker container for The Graph
+data/
 
 # Mac specific
 .DS_STORE

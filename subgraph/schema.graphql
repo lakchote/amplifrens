@@ -1,0 +1,147 @@
+type Contribution @entity {
+  id: ID!
+  from: Bytes!
+  contributionId: BigInt!
+  timestamp: BigInt!
+  category: Int!
+  title: String!
+  url: String!
+  votes: BigInt!
+  hasProfile: Boolean!
+  username: String
+}
+
+type Profile @entity {
+  id: ID!
+  address: Bytes!
+  username: String!
+  timestamp: BigInt!
+}
+
+type SBTLeaderboard @entity {
+  id: ID!
+  topContributionsCount: BigInt!
+}
+
+type SBTBestContribution @entity {
+  id: ID!
+  from: Bytes! # address
+  timestamp: BigInt! # uint256
+  category: Int! # uint8
+  title: String! # string
+  url: String! # string
+}
+
+type SBTMinted @entity {
+  id: ID!
+  owner: Bytes! # address
+  tokenId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+}
+
+type SBTRevoked @entity {
+  id: ID!
+  owner: Bytes! # address
+  tokenId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+}
+type ContributionCreated @entity {
+  id: ID!
+  from: Bytes! # address
+  contributionId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+  category: Int! # uint8
+  title: String! # string
+  url: String! # string
+}
+
+type ContributionDownvoted @entity {
+  id: ID!
+  from: Bytes! # address
+  contributionId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+}
+
+type ContributionRemoved @entity {
+  id: ID!
+  from: Bytes! # address
+  contributionId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+}
+
+type ContributionUpdated @entity {
+  id: ID!
+  from: Bytes! # address
+  contributionId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+  category: Int! # uint8
+  title: String! # string
+  url: String! # string
+}
+
+type ContributionUpvoted @entity {
+  id: ID!
+  from: Bytes! # address
+  contributionId: BigInt! # uint256
+  timestamp: BigInt! # uint256
+}
+type ProfileBlacklisted @entity {
+  id: ID!
+  _address: Bytes! # address
+  reason: String! # string
+  timestamp: BigInt! # uint256
+}
+
+type ProfileCreated @entity {
+  id: ID!
+  _address: Bytes! # address
+  timestamp: BigInt! # uint256
+  username: String! # string
+}
+
+type ProfileDeleted @entity {
+  id: ID!
+  _address: Bytes! # address
+  timestamp: BigInt! # uint256
+}
+
+type ProfileUpdated @entity {
+  id: ID!
+  _address: Bytes! # address
+  timestamp: BigInt! # uint256
+}
+type Initialized @entity {
+  id: ID!
+  version: Int! # uint8
+}
+
+type Paused @entity {
+  id: ID!
+  account: Bytes! # address
+}
+
+type RoleAdminChanged @entity {
+  id: ID!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+}
+
+type RoleGranted @entity {
+  id: ID!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+}
+
+type RoleRevoked @entity {
+  id: ID!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+}
+
+type Unpaused @entity {
+  id: ID!
+  account: Bytes! # address
+}

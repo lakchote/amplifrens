@@ -16,12 +16,29 @@ interface IAmpliFrensSBT {
     /**
      *  @notice Event emitted when a token `tokenId` is minted for `owner`
      */
-    event Minted(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
+    event SBTMinted(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
 
     /**
      *  @notice Event emitted when token `tokenId` of `owner` is revoked
      */
-    event Revoked(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
+    event SBTRevoked(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
+
+    /**
+     * @notice Event that is emitted when a SBT for a top contribution is minted
+     *
+     * @param from The address who created the contribution
+     * @param timestamp The time of the creation
+     * @param category The contribution category
+     * @param title The title of the contribution
+     * @param url The URL of the contribution
+     */
+    event SBTBestContribution(
+        address indexed from,
+        uint256 timestamp,
+        DataTypes.ContributionCategory category,
+        string title,
+        string url
+    );
 
     /**
      * @notice Mints the Soulbound Token to recipient `DataTypes.Contribution.author`
@@ -34,8 +51,9 @@ interface IAmpliFrensSBT {
      * @notice Revoke the token id `tokenId` in case of abuse or error
      *
      * @param tokenId The token ID to revoke
+     * @param from  The address `from` who initiated the transaction
      */
-    function revoke(uint256 tokenId) external;
+    function revoke(uint256 tokenId, address from) external;
 
     /**
      * @notice Count all valid tokens assigned to an owner
@@ -131,7 +149,8 @@ interface IAmpliFrensSBT {
     /**
      * @notice Set the base URI `uri` for tokens, it should end with a "/"
      *
-     * @param uri The base URI
+     * @param uri The new base URI
+     * @param from  The address `from` who initiated the transaction
      */
-    function setBaseURI(string calldata uri) external;
+    function setBaseURI(string calldata uri, address from) external;
 }

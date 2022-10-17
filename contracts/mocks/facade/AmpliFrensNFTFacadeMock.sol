@@ -8,19 +8,28 @@ import "../../interfaces/IAmpliFrensNFT.sol";
 contract AmpliFrensNFTFacadeMock is IAmpliFrensNFT {
     event NFTContract();
 
-    function mint(address, string memory) public {
+    function mint(
+        address,
+        string memory,
+        address
+    ) public {
         emit NFTContract();
     }
 
     function transferNFT(
         address,
         address,
-        uint256
+        uint256,
+        address
     ) external {
         emit NFTContract();
     }
 
-    function setDefaultRoyalty(address, uint96) external {
+    function setDefaultRoyalty(
+        address,
+        uint96,
+        address
+    ) external {
         emit NFTContract();
     }
 
@@ -53,7 +62,7 @@ contract AmpliFrensNFTFacadeMock is IAmpliFrensNFT {
 
     function setApprovalForAll(address operator, bool _approved) external override {}
 
-    function setBaseURI(string calldata) external {
+    function setBaseURI(string calldata, address) external {
         emit NFTContract();
     }
 
