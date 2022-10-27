@@ -66,14 +66,18 @@ contract AmpliFrensFacade is
      * @dev Security guard for minting interval is present in SBTLogic library
      */
     function performUpkeep(bytes calldata) external {
-        DataTypes.Contribution memory topContribution = _contribution.topContribution();
+        DataTypes.TopContribution memory topContribution = _contribution.topContribution();
         _sbt.mint(topContribution);
         _contribution.incrementDayCounter();
     }
 
     /// @inheritdoc IAmpliFrensFacade
-    function mintSBT(DataTypes.Contribution calldata contribution) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
-        _sbt.mint(contribution);
+    function mintSBT(DataTypes.TopContribution calldata topContribution)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        whenNotPaused
+    {
+        _sbt.mint(topContribution);
     }
 
     /// @inheritdoc IAmpliFrensFacade

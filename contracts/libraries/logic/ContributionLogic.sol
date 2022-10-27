@@ -353,7 +353,7 @@ library ContributionLogic {
         uint256 day,
         Counters.Counter storage _daysCounter,
         DataTypes.Contributions storage container
-    ) external view returns (DataTypes.Contribution memory) {
+    ) external view returns (DataTypes.TopContribution memory) {
         PseudoModifier.isNotOutOfBounds(day, _daysCounter);
 
         uint256 topVotes = 0;
@@ -373,6 +373,6 @@ library ContributionLogic {
             }
         }
 
-        return container.contribution[topContributionId];
+        return DataTypes.TopContribution(container.contribution[topContributionId], topContributionId);
     }
 }

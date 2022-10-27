@@ -7,8 +7,9 @@ type Contribution @entity {
   title: String!
   url: String!
   votes: BigInt!
-  hasProfile: Boolean!
   username: String
+  hasProfile: Boolean!
+  bestContribution: Boolean!
 }
 
 type Profile @entity {
@@ -27,9 +28,6 @@ type SBTBestContribution @entity {
   id: ID!
   from: Bytes! # address
   timestamp: BigInt! # uint256
-  category: Int! # uint8
-  title: String! # string
-  url: String! # string
 }
 
 type SBTMinted @entity {

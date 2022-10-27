@@ -59,17 +59,20 @@ contract AmpliFrensContributionFacadeMock is IAmpliFrensContribution {
             );
     }
 
-    function topContribution() external pure returns (DataTypes.Contribution memory) {
+    function topContribution() external pure returns (DataTypes.TopContribution memory) {
         return
-            DataTypes.Contribution(
-                address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045),
-                DataTypes.ContributionCategory(7),
-                true,
-                1664280770,
-                1337,
-                1,
-                "The best contribution",
-                "https://ethereum.org/en/whitepaper"
+            DataTypes.TopContribution(
+                DataTypes.Contribution(
+                    address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045),
+                    DataTypes.ContributionCategory(7),
+                    true,
+                    1664280770,
+                    1337,
+                    1,
+                    "The best contribution",
+                    "https://ethereum.org/en/whitepaper"
+                ),
+                1
             );
     }
 

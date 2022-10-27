@@ -662,48 +662,60 @@
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "author",
-            "type": "address"
-          },
-          {
-            "internalType": "enum DataTypes.ContributionCategory",
-            "name": "category",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "valid",
-            "type": "bool"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "author",
+                "type": "address"
+              },
+              {
+                "internalType": "enum DataTypes.ContributionCategory",
+                "name": "category",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "valid",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "votes",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "dayCounter",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "url",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct DataTypes.Contribution",
+            "name": "contribution",
+            "type": "tuple"
           },
           {
             "internalType": "uint256",
-            "name": "timestamp",
+            "name": "topContributionId",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "votes",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "dayCounter",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "title",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "url",
-            "type": "string"
           }
         ],
-        "internalType": "struct DataTypes.Contribution",
-        "name": "contribution",
+        "internalType": "struct DataTypes.TopContribution",
+        "name": "topContribution",
         "type": "tuple"
       }
     ],

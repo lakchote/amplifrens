@@ -123,7 +123,9 @@ describe("Facade", async () => {
 
   describe("SBT", async () => {
     it("Should forward to IAmpliFrensSBT to mint SBT tokens", async () => {
-      await expect(await facadeProxyContract.mintSBT(contributionCalldata)).to.emit(sbtContract, "SBTContract");
+      await expect(
+        await facadeProxyContract.mintSBT({ contribution: contributionCalldata, topContributionId: 1 })
+      ).to.emit(sbtContract, "SBTContract");
     });
 
     it("Should forward to IAmpliFrensSBT to revoke SBT tokens", async () => {
@@ -291,7 +293,9 @@ describe("Facade", async () => {
       const pauseTx = await facadeProxyContract.pause();
       await pauseTx.wait();
 
-      await expect(facadeProxyContract.mintSBT(contributionCalldata)).to.be.revertedWith("Pausable: paused");
+      await expect(
+        facadeProxyContract.mintSBT({ contribution: contributionCalldata, topContributionId: 1 })
+      ).to.be.revertedWith("Pausable: paused");
       await expect(facadeProxyContract.setSBTBaseURI("https://www.amplifrens.xyz")).to.be.revertedWith(
         "Pausable: paused"
       );
@@ -329,12 +333,16 @@ describe("Facade", async () => {
       const pauseTx = await facadeProxyContract.pause();
       await pauseTx.wait();
 
-      await expect(facadeProxyContract.mintSBT(contributionCalldata)).to.be.revertedWith("Pausable: paused");
+      await expect(
+        facadeProxyContract.mintSBT({ contribution: contributionCalldata, topContributionId: 1 })
+      ).to.be.revertedWith("Pausable: paused");
 
       const unpauseTx = await facadeProxyContract.unpause();
       await unpauseTx.wait();
 
-      await expect(facadeProxyContract.mintSBT(contributionCalldata)).to.not.be.revertedWith("Pausable: paused");
+      await expect(
+        facadeProxyContract.mintSBT({ contribution: contributionCalldata, topContributionId: 1 })
+      ).to.not.be.revertedWith("Pausable: paused");
       await expect(facadeProxyContract.setSBTBaseURI("https://www.amplifrens.xyz")).to.not.be.revertedWith(
         "Pausable: paused"
       );
@@ -370,7 +378,9 @@ describe("Facade", async () => {
   describe("Access roles", async () => {
     it("Should prevent core features to be called by someone who doesn't has admin role", async () => {
       await expect(facadeProxyContract.connect(accounts[2]).setNFTBaseURI("https://www.amplifrens.xyz")).to.be.reverted;
-      await expect(facadeProxyContract.connect(accounts[2]).mintSBT(contributionCalldata)).to.be.reverted;
+      await expect(
+        facadeProxyContract.connect(accounts[2]).mintSBT({ contribution: contributionCalldata, topContributionId: 1 })
+      ).to.be.reverted;
       await expect(
         facadeProxyContract.connect(accounts[2]).deleteUserProfile("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
       ).to.be.reverted;
@@ -397,7 +407,7 @@ describe("Facade", async () => {
 
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensFacade", async () => {
-      expect(await facadeProxyContract.supportsInterface("0x42aee8fb")).to.be.true;
+      expect(await facadeProxyContract.supportsInterface("0x7a885ffa")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

@@ -19,20 +19,14 @@ library SBTLogic {
     /// @dev See `IAmpliFrensSBT` for descriptions
     event SBTMinted(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
     event SBTRevoked(address indexed owner, uint256 indexed tokenId, uint256 timestamp);
-    event SBTBestContribution(
-        address indexed from,
-        uint256 timestamp,
-        DataTypes.ContributionCategory category,
-        string title,
-        string url
-    );
+    event SBTBestContribution(uint256 topContributionId, address indexed from, uint256 timestamp);
 
     /**
      * @notice Mints the Soulbound Token to recipient `DataTypes.Contribution.author`
      *
      * @param from  The address `from` who initiated the transaction
      * @param facadeProxyAddress The facade's proxy address `facadeProxyAddress`
-     * @param contribution Contribution of the day data contained in struct `DataTypes.Contribution`
+     * @param topContribution Contribution of the day data contained in struct `DataTypes.TopContribution`
      * @param _tokens The total soulbound tokens mapped to contributions
      * @param _tokensForAddress The total tokens by addresses
      * @param _validTokensForAddress Counter of valid tokens for addresses
@@ -43,7 +37,7 @@ library SBTLogic {
     function mint(
         address from,
         address facadeProxyAddress,
-        DataTypes.Contribution calldata contribution,
+        DataTypes.TopContribution calldata topContribution,
         mapping(uint256 => DataTypes.Contribution) storage _tokens,
         mapping(address => uint256[]) storage _tokensForAddress,
         mapping(address => uint256) storage _validTokensForAddress,
@@ -59,6 +53,8 @@ library SBTLogic {
 
         _tokenIdCounter.increment();
         uint256 currentTokenId = _tokenIdCounter.current();
+        DataTypes.Contribution memory contribution = topContribution.contribution;
+
         _tokens[currentTokenId] = DataTypes.Contribution(
             contribution.author,
             contribution.category,
@@ -79,13 +75,7 @@ library SBTLogic {
         mintingParams.lastBlockTimestamp = block.timestamp;
 
         emit SBTMinted(contribution.author, currentTokenId, block.timestamp);
-        emit SBTBestContribution(
-            contribution.author,
-            block.timestamp,
-            contribution.category,
-            contribution.title,
-            contribution.url
-        );
+        emit SBTBestContribution(topContribution.topContributionId, contribution.author, block.timestamp);
     }
 
     /**

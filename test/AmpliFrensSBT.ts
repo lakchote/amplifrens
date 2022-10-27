@@ -20,7 +20,7 @@ let errorsLib: Errors;
 const title = ethers.utils.formatBytes32String("Gud alpha , get latest WLs here");
 const contributionCategory = 7; // Misc category
 const timestamp = Math.floor(Date.now() / 1000); // convert timestamp to seconds
-const votes = 140;
+const votes = 500;
 const url = "https://www.twitter.com/profile/alphaMaker";
 
 describe("Soulbound Token", async () => {
@@ -53,14 +53,17 @@ describe("Soulbound Token", async () => {
     await setBaseURITx.wait();
 
     const mintTx = await sbtContract.mint({
-      author: accounts[1].address,
-      category: contributionCategory,
-      valid: true,
-      timestamp: timestamp,
-      votes: votes,
-      dayCounter: 1,
-      title: title,
-      url: url,
+      contribution: {
+        author: accounts[1].address,
+        category: contributionCategory,
+        valid: true,
+        timestamp: timestamp,
+        votes: 500,
+        dayCounter: 1,
+        title: title,
+        url: url,
+      },
+      topContributionId: 1,
     });
     await mintTx.wait();
     timestampDeployment = await (await ethers.provider.getBlock("latest")).timestamp;
@@ -76,6 +79,25 @@ describe("Soulbound Token", async () => {
     it("Should be called once per day only", async () => {
       await expect(
         sbtContract.mint({
+          contribution: {
+            author: accounts[1].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
+        })
+      ).to.be.revertedWithCustomError(errorsLib, "MintingIntervalNotMet");
+    });
+
+    it("Should increase the total tokens counter for address", async () => {
+      increaseTime();
+      const secondMintTx = await sbtContract.mint({
+        contribution: {
           author: accounts[1].address,
           category: contributionCategory,
           valid: true,
@@ -84,21 +106,8 @@ describe("Soulbound Token", async () => {
           dayCounter: 1,
           title: title,
           url: url,
-        })
-      ).to.be.revertedWithCustomError(errorsLib, "MintingIntervalNotMet");
-    });
-
-    it("Should increase the total tokens counter for address", async () => {
-      increaseTime();
-      const secondMintTx = await sbtContract.mint({
-        author: accounts[1].address,
-        category: contributionCategory,
-        valid: true,
-        timestamp: timestamp,
-        votes: 500,
-        dayCounter: 1,
-        title: title,
-        url: url,
+        },
+        topContributionId: 1,
       });
       await secondMintTx.wait();
       expect(await sbtContract.balanceOf(accounts[1].address)).to.be.eq(2);
@@ -114,14 +123,17 @@ describe("Soulbound Token", async () => {
       it("Should increase the tokens emitted count", async () => {
         increaseTime();
         const secondMintTx = await sbtContract.mint({
-          author: accounts[1].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[1].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await secondMintTx.wait();
         expect(await sbtContract.emittedCount()).to.eq(2);
@@ -142,26 +154,32 @@ describe("Soulbound Token", async () => {
       it("Should track the tokens holders count properly", async () => {
         increaseTime();
         const mintTx = await sbtContract.mint({
-          author: accounts[2].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[2].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await mintTx.wait();
         increaseTime();
         const secondMintTx = await sbtContract.mint({
-          author: accounts[2].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[2].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await secondMintTx.wait();
         expect(await sbtContract.holdersCount()).to.eq(2);
@@ -172,7 +190,24 @@ describe("Soulbound Token", async () => {
         for (let i = 0; i <= 5; i++) {
           increaseTime();
           const mintTx = await sbtContract.mint({
-            author: ethers.Wallet.createRandom().address,
+            contribution: {
+              author: ethers.Wallet.createRandom().address,
+              category: contributionCategory,
+              valid: true,
+              timestamp: timestamp,
+              votes: 500,
+              dayCounter: 1,
+              title: title,
+              url: url,
+            },
+            topContributionId: 1,
+          });
+          await mintTx.wait();
+        }
+        increaseTime();
+        const mintTx = await sbtContract.mint({
+          contribution: {
+            author: accounts[1].address,
             category: contributionCategory,
             valid: true,
             timestamp: timestamp,
@@ -180,19 +215,8 @@ describe("Soulbound Token", async () => {
             dayCounter: 1,
             title: title,
             url: url,
-          });
-          await mintTx.wait();
-        }
-        increaseTime();
-        const mintTx = await sbtContract.mint({
-          author: accounts[1].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          },
+          topContributionId: 1,
         });
         await mintTx.wait();
         expect(await sbtContract.tokenOfOwnerByIndex(accounts[1].address, 1)).to.be.eq(8);
@@ -219,14 +243,17 @@ describe("Soulbound Token", async () => {
       expect(await sbtContract.balanceOf(accounts[0].address)).to.eq(0);
       expect(await sbtContract.balanceOf(accounts[1].address)).to.eq(1);
       const mintTx = await sbtContract.mint({
-        author: accounts[1].address,
-        category: contributionCategory,
-        valid: true,
-        timestamp: timestamp,
-        votes: 500,
-        dayCounter: 1,
-        title: title,
-        url: url,
+        contribution: {
+          author: accounts[1].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          dayCounter: 1,
+          title: title,
+          url: url,
+        },
+        topContributionId: 1,
       });
       await mintTx.wait();
       expect(await sbtContract.balanceOf(accounts[1].address)).to.eq(2);
@@ -235,14 +262,17 @@ describe("Soulbound Token", async () => {
     it("Should identify properly the owner of a tokenId", async () => {
       increaseTime();
       const mintTx = await sbtContract.mint({
-        author: accounts[2].address,
-        category: contributionCategory,
-        valid: true,
-        timestamp: timestamp,
-        votes: 500,
-        dayCounter: 1,
-        title: title,
-        url: url,
+        contribution: {
+          author: accounts[2].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          dayCounter: 1,
+          title: title,
+          url: url,
+        },
+        topContributionId: 1,
       });
       await mintTx.wait();
       expect(await sbtContract.ownerOf(2)).to.be.eq(accounts[2].address);
@@ -300,14 +330,17 @@ describe("Soulbound Token", async () => {
     it("Should set the Token URI correctly", async () => {
       increaseTime();
       const mintTx = await sbtContract.mint({
-        author: accounts[1].address,
-        category: contributionCategory,
-        valid: true,
-        timestamp: timestamp,
-        votes: 500,
-        dayCounter: 1,
-        title: title,
-        url: url,
+        contribution: {
+          author: accounts[1].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          dayCounter: 1,
+          title: title,
+          url: url,
+        },
+        topContributionId: 1,
       });
       await mintTx.wait();
       const tokenURI = await sbtContract.tokenURI(BigNumber.from("2"));
@@ -323,14 +356,17 @@ describe("Soulbound Token", async () => {
       const setTokenURITx = await sbtContract.setBaseURI("https://www.amplifrens.xyz/", accounts[0].address);
       await setTokenURITx.wait();
       const mintTx = await sbtContract.mint({
-        author: accounts[1].address,
-        category: contributionCategory,
-        valid: true,
-        timestamp: timestamp,
-        votes: 500,
-        dayCounter: 1,
-        title: title,
-        url: url,
+        contribution: {
+          author: accounts[1].address,
+          category: contributionCategory,
+          valid: true,
+          timestamp: timestamp,
+          votes: 500,
+          dayCounter: 1,
+          title: title,
+          url: url,
+        },
+        topContributionId: 1,
       });
       await mintTx.wait();
       const tokenURI = await sbtContract.tokenURI(BigNumber.from("1"));
@@ -351,14 +387,17 @@ describe("Soulbound Token", async () => {
       for (let i = 0; i <= 4; i++) {
         increaseTime();
         const mintTx = await sbtContract.mint({
-          author: accounts[2].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[2].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await mintTx.wait();
       }
@@ -368,14 +407,17 @@ describe("Soulbound Token", async () => {
       for (let i = 0; i <= 12; i++) {
         increaseTime();
         const mintTx = await sbtContract.mint({
-          author: accounts[2].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[2].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await mintTx.wait();
       }
@@ -385,14 +427,17 @@ describe("Soulbound Token", async () => {
       for (let i = 0; i <= 20; i++) {
         increaseTime();
         const mintTx = await sbtContract.mint({
-          author: accounts[2].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[2].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await mintTx.wait();
       }
@@ -402,14 +447,17 @@ describe("Soulbound Token", async () => {
       for (let i = 0; i <= 33; i++) {
         increaseTime();
         const mintTx = await sbtContract.mint({
-          author: accounts[2].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[2].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         });
         await mintTx.wait();
       }
@@ -422,28 +470,23 @@ describe("Soulbound Token", async () => {
       increaseTime();
       await expect(
         sbtContract.mint({
-          author: accounts[1].address,
-          category: contributionCategory,
-          valid: true,
-          timestamp: timestamp,
-          votes: 500,
-          dayCounter: 1,
-          title: title,
-          url: url,
+          contribution: {
+            author: accounts[1].address,
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
         })
       )
         .to.emit(sbtContract, "SBTMinted")
         .withArgs(accounts[1].address, 2, await (await ethers.provider.getBlock("latest")).timestamp)
         .to.emit(sbtContract, "SBTBestContribution")
-        .withArgs(
-          accounts[1].address,
-          await (
-            await ethers.provider.getBlock("latest")
-          ).timestamp,
-          contributionCategory,
-          title,
-          url
-        );
+        .withArgs(1, accounts[1].address, await (await ethers.provider.getBlock("latest")).timestamp);
     });
 
     it("Should emit a Revoked event when a token is revoked", async () => {
@@ -455,7 +498,7 @@ describe("Soulbound Token", async () => {
   });
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensSBT", async () => {
-      expect(await sbtContract.supportsInterface("0xce80ad3b")).to.be.true;
+      expect(await sbtContract.supportsInterface("0x2097bc14")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

@@ -4,17 +4,20 @@ import {
   SBTMinted as SBTMintedEvent,
   SBTRevoked as SBTRevokedEvent,
 } from "../generated/AmpliFrensSBT/AmpliFrensSBT";
-import { SBTBestContribution, SBTLeaderboard, SBTMinted, SBTRevoked } from "../generated/schema";
+import { Contribution, SBTBestContribution, SBTLeaderboard, SBTMinted, SBTRevoked } from "../generated/schema";
 
 export function handleSBTBestContribution(event: SBTBestContributionEvent): void {
-  let entity = new SBTBestContribution(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+  let entity = new SBTBestContribution(event.params.topContributionId.toString());
 
   entity.from = event.params.from;
   entity.timestamp = event.params.timestamp;
-  entity.category = event.params.category;
-  entity.title = event.params.title;
-  entity.url = event.params.url;
   entity.save();
+
+  let contribution = Contribution.load(event.params.topContributionId.toString());
+  if (contribution) {
+    contribution.bestContribution = true;
+    contribution.save();
+  }
 }
 
 export function handleSBTMinted(event: SBTMintedEvent): void {

@@ -26,26 +26,18 @@ interface IAmpliFrensSBT {
     /**
      * @notice Event that is emitted when a SBT for a top contribution is minted
      *
+     * @param topContributionId The ID of the contribution of the day
      * @param from The address who created the contribution
      * @param timestamp The time of the creation
-     * @param category The contribution category
-     * @param title The title of the contribution
-     * @param url The URL of the contribution
      */
-    event SBTBestContribution(
-        address indexed from,
-        uint256 timestamp,
-        DataTypes.ContributionCategory category,
-        string title,
-        string url
-    );
+    event SBTBestContribution(uint256 topContributionId, address indexed from, uint256 timestamp);
 
     /**
-     * @notice Mints the Soulbound Token to recipient `DataTypes.Contribution.author`
+     * @notice Mints the Soulbound Token to recipient `DataTypes.TopContribution.author`
      *
-     * @param contribution Contribution of the day data contained in struct `DataTypes.Contribution`
+     * @param contribution Contribution of the day data contained in struct `DataTypes.TopContribution`
      */
-    function mint(DataTypes.Contribution calldata contribution) external;
+    function mint(DataTypes.TopContribution calldata contribution) external;
 
     /**
      * @notice Revoke the token id `tokenId` in case of abuse or error

@@ -251,7 +251,7 @@ describe("Contribution", async () => {
         await voteTx.wait();
       }
 
-      const topContribution = await contributionContract.topContribution();
+      const topContribution = (await contributionContract.topContribution()).contribution;
       expect(topContribution.title).to.eq(title);
       expect(topContribution.category).to.eq(contributionCategory);
       expect(topContribution.url).to.eq(url);
@@ -260,7 +260,7 @@ describe("Contribution", async () => {
       const removeContributionTx = await contributionContract.remove(1, accounts[0].address);
       await removeContributionTx.wait();
 
-      const updatedTopContribution = await contributionContract.topContribution();
+      const updatedTopContribution = (await contributionContract.topContribution()).contribution;
       expect(updatedTopContribution.title).to.eq("NEW NFT Marketplace");
       expect(updatedTopContribution.category).to.eq(7);
       expect(updatedTopContribution.url).to.eq("https://www.ethernal.xyz");

@@ -17,9 +17,9 @@ interface IAmpliFrensFacade {
      *
      * @notice Mint a Soulbound Token for today's most upvoted contribution
      *
-     * @param contribution Contribution of the day's data
+     * @param topContribution Contribution of the day's data
      */
-    function mintSBT(DataTypes.Contribution calldata contribution) external;
+    function mintSBT(DataTypes.TopContribution calldata topContribution) external;
 
     /**
      * Revoke the SBT with id `tokenId`
