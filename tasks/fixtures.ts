@@ -29,6 +29,9 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   const facadeFactory = await ethers.getContractFactory("AmpliFrensFacade");
   const proxyContract = facadeFactory.attach(addressesJson.contracts.facade.Proxy);
 
+  console.log(`Creating profile for account ${accounts[3].address}...`);
+  await createProfile(proxyContract, accounts[3]);
+
   console.log("Creating contributions...");
   let accountIndex = 0;
   for (let i = 0; i < contributions.length; i++) {
@@ -47,7 +50,7 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   }
 
   console.log("Downvoting contribution with id 1...");
-  const downvoteTx = await proxyContract.connect(accounts[2]).downvoteContribution(1);
+  const downvoteTx = await proxyContract.connect(accounts[3]).downvoteContribution(1);
   await downvoteTx.wait();
 
   console.log("Updating contribution with id 1...");
@@ -56,8 +59,8 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
     .updateContribution(1, 7, "TEST update", "https://www.test.xyz");
   await updateContributionTx.wait();
 
-  console.log("Removing contribution with id 3...");
-  const removeContributionTx = await proxyContract.connect(accounts[1]).removeContribution(3);
+  console.log("Removing contribution with id 4...");
+  const removeContributionTx = await proxyContract.connect(accounts[1]).removeContribution(4);
   await removeContributionTx.wait();
 
   console.log(`Creating profile for account ${accounts[2].address}...`);
@@ -86,9 +89,6 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   const removeProfileTx = await proxyContract.connect(accounts[1]).deleteUserProfile(accounts[4].address);
   await removeProfileTx.wait();
 
-  console.log(`Creating profile for account ${accounts[3].address}...`);
-  await createProfile(proxyContract, accounts[3]);
-
   console.log("Increasing EVM time to mint a SBT for the contribution of the day...");
   await hre.network.provider.send("evm_increaseTime", [1000 * 60 * 60 * 24]);
   await hre.network.provider.send("evm_mine");
@@ -106,7 +106,7 @@ async function createProfile(proxyContract: Contract, signer: Signer) {
     discordHandle: randomString + "#1337",
     twitterHandle: randomString,
     email: randomString + "@gmail.com",
-    websiteUrl: "https://www" + randomString + ".xyz",
+    websiteUrl: "https://www." + randomString + ".xyz",
     valid: true,
   });
   await createProfileTx.wait();
