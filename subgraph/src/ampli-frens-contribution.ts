@@ -50,15 +50,23 @@ export function handleContributionCreated(event: ContributionCreatedEvent): void
 }
 
 export function handleContributionDownvoted(event: ContributionDownvotedEvent): void {
-  const id = event.params.contributionId.toString();
-
-  let entity = new ContributionDownvoted(id);
+  let entity = new ContributionDownvoted(
+    event.params.contributionId.toString() + "-" + event.params.from.toHexString()
+  );
   entity.from = event.params.from;
   entity.contributionId = event.params.contributionId;
   entity.timestamp = event.params.timestamp;
   entity.save();
 
-  let contribution = Contribution.load(id);
+  let contributionUpvoted = ContributionUpvoted.load(
+    event.params.contributionId.toString() + "-" + event.params.from.toHexString()
+  );
+  if (contributionUpvoted) {
+    contributionUpvoted.from = deadAddress;
+    contributionUpvoted.save();
+  }
+
+  let contribution = Contribution.load(event.params.contributionId.toString());
   contribution!.votes = contribution!.votes.minus(BigInt.fromI32(1));
   contribution!.save();
 }
@@ -98,15 +106,21 @@ export function handleContributionUpdated(event: ContributionUpdatedEvent): void
 }
 
 export function handleContributionUpvoted(event: ContributionUpvotedEvent): void {
-  const id = event.params.contributionId.toString();
-
-  let entity = new ContributionUpvoted(id);
+  let entity = new ContributionUpvoted(event.params.contributionId.toString() + "-" + event.params.from.toHexString());
   entity.from = event.params.from;
   entity.contributionId = event.params.contributionId;
   entity.timestamp = event.params.timestamp;
   entity.save();
 
-  let contribution = Contribution.load(id);
+  let contributionDownvoted = ContributionDownvoted.load(
+    event.params.contributionId.toString() + "-" + event.params.from.toHexString()
+  );
+  if (contributionDownvoted) {
+    contributionDownvoted.from = deadAddress;
+    contributionDownvoted.save();
+  }
+
+  let contribution = Contribution.load(event.params.contributionId.toString());
   contribution!.votes = contribution!.votes.plus(BigInt.fromI32(1));
   contribution!.save();
 }
