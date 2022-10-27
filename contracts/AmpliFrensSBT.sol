@@ -55,11 +55,11 @@ contract AmpliFrensSBT is IERC165, IAmpliFrensSBT {
     }
 
     /// @inheritdoc IAmpliFrensSBT
-    function mint(DataTypes.Contribution calldata contribution) external {
+    function mint(DataTypes.TopContribution calldata topContribution) external {
         SBTLogic.mint(
             msg.sender,
             facadeProxyAddress,
-            contribution,
+            topContribution,
             _tokens,
             _tokensForAddress,
             _validTokensForAddress,

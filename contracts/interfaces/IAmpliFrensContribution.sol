@@ -157,7 +157,7 @@ interface IAmpliFrensContribution {
      *
      * @return The most upvoted contribution
      */
-    function topContribution() external view returns (DataTypes.Contribution memory);
+    function topContribution() external view returns (DataTypes.TopContribution memory);
 
     /**
      * @notice Return the total number of contributions

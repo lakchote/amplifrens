@@ -39,6 +39,7 @@ export function handleContributionCreated(event: ContributionCreatedEvent): void
   contribution.url = event.params.url;
   contribution.votes = BigInt.fromI32(0);
   contribution.hasProfile = false;
+  contribution.bestContribution = false;
 
   const profile = Profile.load(event.params.from.toHexString());
   if (profile) {

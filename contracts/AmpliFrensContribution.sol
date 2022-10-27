@@ -93,7 +93,7 @@ contract AmpliFrensContribution is IERC165, IAmpliFrensContribution {
     }
 
     /// @inheritdoc IAmpliFrensContribution
-    function topContribution() external view returns (DataTypes.Contribution memory) {
+    function topContribution() external view returns (DataTypes.TopContribution memory) {
         return ContributionLogic.topContribution(_daysCounter.current(), _daysCounter, contributions);
     }
 

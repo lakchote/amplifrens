@@ -45,7 +45,7 @@ dataSources:
         - name: AmpliFrensSBT
           file: ./abis/AmpliFrensSBT.json
       eventHandlers:
-        - event: SBTBestContribution(indexed address,uint256,uint8,string,string)
+        - event: SBTBestContribution(uint256,indexed address,uint256)
           handler: handleSBTBestContribution
         - event: SBTMinted(indexed address,indexed uint256,uint256)
           handler: handleSBTMinted

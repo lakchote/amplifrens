@@ -70,6 +70,15 @@ To check code coverage run the command:
 
 ## The Graph
 
+### Prerequisites
+
+1. Launch Docker daemon
+2. Generate AssemblyScript for subgraph
+
+   `yarn graph-codegen`
+
+### Steps
+
 To use The Graph use the following steps:
 
 1. Launch Hardhat node

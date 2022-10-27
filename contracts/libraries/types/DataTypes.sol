@@ -48,6 +48,14 @@ library DataTypes {
     }
 
     /**
+     * @notice Contain a top contribution's data
+     */
+    struct TopContribution {
+        DataTypes.Contribution contribution;
+        uint256 topContributionId;
+    }
+
+    /**
      * @notice Contain contributions data
      *
      * @dev address[] && uint256[] are used to iterate over upvoted/downvoted mappings for reset function

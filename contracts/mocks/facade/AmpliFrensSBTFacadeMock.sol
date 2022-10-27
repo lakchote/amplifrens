@@ -8,7 +8,7 @@ import "../../interfaces/IAmpliFrensSBT.sol";
 contract AmpliFrensSBTFacadeMock is IAmpliFrensSBT {
     event SBTContract();
 
-    function mint(DataTypes.Contribution calldata) external override {
+    function mint(DataTypes.TopContribution calldata) external override {
         emit SBTContract();
     }
 
