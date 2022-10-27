@@ -72,7 +72,9 @@ contract AmpliFrensSBTFacadeMock is IAmpliFrensSBT {
             );
     }
 
-    function getStatus(address _address) external view override returns (DataTypes.FrenStatus) {}
+    function getStatus(address) external pure override returns (DataTypes.FrenStatus) {
+        return DataTypes.FrenStatus.Degen;
+    }
 
     function tokenURI(uint256) external pure override returns (string memory) {
         return "IAmpliFrensSBT";

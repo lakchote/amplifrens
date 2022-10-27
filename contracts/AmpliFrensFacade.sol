@@ -238,6 +238,11 @@ contract AmpliFrensFacade is
     }
 
     /// @inheritdoc IAmpliFrensFacade
+    function sbtStatus(address from) external view returns (DataTypes.FrenStatus) {
+        return _sbt.getStatus(from);
+    }
+
+    /// @inheritdoc IAmpliFrensFacade
     function totalSBTs() external view returns (uint256) {
         return _sbt.emittedCount();
     }

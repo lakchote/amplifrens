@@ -135,6 +135,11 @@ describe("Facade", async () => {
       await expect(await facadeProxyContract.isMintingIntervalMet()).to.eq(true);
     });
 
+    it("Should forward to IAmpliFrensSBT to get status", async () => {
+      // in the mock, getStatus() returns 1
+      await expect(await facadeProxyContract.sbtStatus(accounts[2].address)).to.eq(1);
+    });
+
     it("Should forward to IAmpliFrensSBT to set SBT base URI", async () => {
       await expect(await facadeProxyContract.setSBTBaseURI("https://www.amplifrens.xyz")).to.emit(
         sbtContract,
@@ -392,7 +397,7 @@ describe("Facade", async () => {
 
   describe("Interfaces", async () => {
     it("Should support IAmpliFrensFacade", async () => {
-      expect(await facadeProxyContract.supportsInterface("0xf8a21ae9")).to.be.true;
+      expect(await facadeProxyContract.supportsInterface("0x42aee8fb")).to.be.true;
     });
 
     it("Should support IERC165", async () => {

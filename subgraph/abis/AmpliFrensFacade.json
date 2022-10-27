@@ -142,23 +142,47 @@
   {
     "inputs": [],
     "name": "DEFAULT_ADMIN_ROLE",
-    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
     ],
     "name": "balanceOfSBT",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" },
-      { "internalType": "string", "name": "reason", "type": "string" }
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      }
     ],
     "name": "blacklistUserProfile",
     "outputs": [],
@@ -166,11 +190,25 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
     "name": "checkUpkeep",
     "outputs": [
-      { "internalType": "bool", "name": "upkeepNeeded", "type": "bool" },
-      { "internalType": "bytes", "name": "performData", "type": "bytes" }
+      {
+        "internalType": "bool",
+        "name": "upkeepNeeded",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "performData",
+        "type": "bytes"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -182,8 +220,16 @@
         "name": "category",
         "type": "uint8"
       },
-      { "internalType": "string", "name": "title", "type": "string" },
-      { "internalType": "string", "name": "url", "type": "string" }
+      {
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "url",
+        "type": "string"
+      }
     ],
     "name": "createContribution",
     "outputs": [],
@@ -194,7 +240,11 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "string", "name": "lensHandle", "type": "string" },
+          {
+            "internalType": "string",
+            "name": "lensHandle",
+            "type": "string"
+          },
           {
             "internalType": "string",
             "name": "discordHandle",
@@ -205,10 +255,26 @@
             "name": "twitterHandle",
             "type": "string"
           },
-          { "internalType": "string", "name": "username", "type": "string" },
-          { "internalType": "string", "name": "email", "type": "string" },
-          { "internalType": "string", "name": "websiteUrl", "type": "string" },
-          { "internalType": "bool", "name": "valid", "type": "bool" }
+          {
+            "internalType": "string",
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "websiteUrl",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          }
         ],
         "internalType": "struct DataTypes.Profile",
         "name": "profile",
@@ -222,7 +288,11 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
     ],
     "name": "deleteUserProfile",
     "outputs": [],
@@ -231,7 +301,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "contributionId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      }
     ],
     "name": "downvoteContribution",
     "outputs": [],
@@ -240,28 +314,56 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "contributionId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      }
     ],
     "name": "getContribution",
     "outputs": [
       {
         "components": [
-          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
           {
             "internalType": "enum DataTypes.ContributionCategory",
             "name": "category",
             "type": "uint8"
           },
-          { "internalType": "bool", "name": "valid", "type": "bool" },
-          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
-          { "internalType": "uint256", "name": "votes", "type": "uint256" },
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "votes",
+            "type": "uint256"
+          },
           {
             "internalType": "uint256",
             "name": "dayCounter",
             "type": "uint256"
           },
-          { "internalType": "string", "name": "title", "type": "string" },
-          { "internalType": "string", "name": "url", "type": "string" }
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "url",
+            "type": "string"
+          }
         ],
         "internalType": "struct DataTypes.Contribution",
         "name": "",
@@ -273,44 +375,94 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
     ],
     "name": "getProfileBlacklistReason",
-    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "bytes32", "name": "role", "type": "bytes32" }
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
     ],
     "name": "getRoleAdmin",
-    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
     "name": "getSBTById",
     "outputs": [
       {
         "components": [
-          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
           {
             "internalType": "enum DataTypes.ContributionCategory",
             "name": "category",
             "type": "uint8"
           },
-          { "internalType": "bool", "name": "valid", "type": "bool" },
-          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
-          { "internalType": "uint256", "name": "votes", "type": "uint256" },
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "votes",
+            "type": "uint256"
+          },
           {
             "internalType": "uint256",
             "name": "dayCounter",
             "type": "uint256"
           },
-          { "internalType": "string", "name": "title", "type": "string" },
-          { "internalType": "string", "name": "url", "type": "string" }
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "url",
+            "type": "string"
+          }
         ],
         "internalType": "struct DataTypes.Contribution",
         "name": "",
@@ -322,13 +474,21 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
     ],
     "name": "getUserProfile",
     "outputs": [
       {
         "components": [
-          { "internalType": "string", "name": "lensHandle", "type": "string" },
+          {
+            "internalType": "string",
+            "name": "lensHandle",
+            "type": "string"
+          },
           {
             "internalType": "string",
             "name": "discordHandle",
@@ -339,10 +499,26 @@
             "name": "twitterHandle",
             "type": "string"
           },
-          { "internalType": "string", "name": "username", "type": "string" },
-          { "internalType": "string", "name": "email", "type": "string" },
-          { "internalType": "string", "name": "websiteUrl", "type": "string" },
-          { "internalType": "bool", "name": "valid", "type": "bool" }
+          {
+            "internalType": "string",
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "websiteUrl",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          }
         ],
         "internalType": "struct DataTypes.Profile",
         "name": "",
@@ -354,8 +530,16 @@
   },
   {
     "inputs": [
-      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
-      { "internalType": "address", "name": "account", "type": "address" }
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
     ],
     "name": "grantRole",
     "outputs": [],
@@ -364,36 +548,78 @@
   },
   {
     "inputs": [
-      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
-      { "internalType": "address", "name": "account", "type": "address" }
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
     ],
     "name": "hasRole",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_address", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
     ],
     "name": "hasUserProfile",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "owner", "type": "address" },
-      { "internalType": "uint256", "name": "index", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
     ],
     "name": "idSBTOfOwnerByIndex",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "adminAddress", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "adminAddress",
+        "type": "address"
+      }
     ],
     "name": "initialize",
     "outputs": [],
@@ -403,14 +629,28 @@
   {
     "inputs": [],
     "name": "isMintingIntervalMet",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "to", "type": "address" },
-      { "internalType": "string", "name": "uri", "type": "string" }
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "uri",
+        "type": "string"
+      }
     ],
     "name": "mintNFT",
     "outputs": [],
@@ -421,22 +661,46 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
           {
             "internalType": "enum DataTypes.ContributionCategory",
             "name": "category",
             "type": "uint8"
           },
-          { "internalType": "bool", "name": "valid", "type": "bool" },
-          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
-          { "internalType": "uint256", "name": "votes", "type": "uint256" },
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "votes",
+            "type": "uint256"
+          },
           {
             "internalType": "uint256",
             "name": "dayCounter",
             "type": "uint256"
           },
-          { "internalType": "string", "name": "title", "type": "string" },
-          { "internalType": "string", "name": "url", "type": "string" }
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "url",
+            "type": "string"
+          }
         ],
         "internalType": "struct DataTypes.Contribution",
         "name": "contribution",
@@ -450,10 +714,20 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "token", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "token",
+        "type": "uint256"
+      }
     ],
     "name": "ownerOfSBT",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
@@ -467,12 +741,24 @@
   {
     "inputs": [],
     "name": "paused",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
     "name": "performUpkeep",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -480,7 +766,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "contributionId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      }
     ],
     "name": "removeContribution",
     "outputs": [],
@@ -489,8 +779,16 @@
   },
   {
     "inputs": [
-      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
-      { "internalType": "address", "name": "account", "type": "address" }
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
     ],
     "name": "renounceRole",
     "outputs": [],
@@ -506,8 +804,16 @@
   },
   {
     "inputs": [
-      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
-      { "internalType": "address", "name": "account", "type": "address" }
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
     ],
     "name": "revokeRole",
     "outputs": [],
@@ -516,7 +822,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
     ],
     "name": "revokeSBT",
     "outputs": [],
@@ -524,7 +834,32 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "string", "name": "uri", "type": "string" }],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      }
+    ],
+    "name": "sbtStatus",
+    "outputs": [
+      {
+        "internalType": "enum DataTypes.FrenStatus",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "uri",
+        "type": "string"
+      }
+    ],
     "name": "setNFTBaseURI",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -532,8 +867,16 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "receiver", "type": "address" },
-      { "internalType": "uint96", "name": "feeNumerator", "type": "uint96" }
+      {
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "internalType": "uint96",
+        "name": "feeNumerator",
+        "type": "uint96"
+      }
     ],
     "name": "setNFTGlobalRoyalties",
     "outputs": [],
@@ -541,7 +884,13 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "string", "name": "uri", "type": "string" }],
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "uri",
+        "type": "string"
+      }
+    ],
     "name": "setSBTBaseURI",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -549,39 +898,79 @@
   },
   {
     "inputs": [
-      { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
     ],
     "name": "supportsInterface",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "pure",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "totalContributions",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "totalSBTHolders",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "totalSBTs",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "from", "type": "address" },
-      { "internalType": "address", "name": "to", "type": "address" },
-      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
     ],
     "name": "transferNFT",
     "outputs": [],
@@ -607,8 +996,16 @@
         "name": "category",
         "type": "uint8"
       },
-      { "internalType": "string", "name": "title", "type": "string" },
-      { "internalType": "string", "name": "url", "type": "string" }
+      {
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "url",
+        "type": "string"
+      }
     ],
     "name": "updateContribution",
     "outputs": [],
@@ -619,7 +1016,11 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "string", "name": "lensHandle", "type": "string" },
+          {
+            "internalType": "string",
+            "name": "lensHandle",
+            "type": "string"
+          },
           {
             "internalType": "string",
             "name": "discordHandle",
@@ -630,10 +1031,26 @@
             "name": "twitterHandle",
             "type": "string"
           },
-          { "internalType": "string", "name": "username", "type": "string" },
-          { "internalType": "string", "name": "email", "type": "string" },
-          { "internalType": "string", "name": "websiteUrl", "type": "string" },
-          { "internalType": "bool", "name": "valid", "type": "bool" }
+          {
+            "internalType": "string",
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "websiteUrl",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "valid",
+            "type": "bool"
+          }
         ],
         "internalType": "struct DataTypes.Profile",
         "name": "profile",
@@ -647,7 +1064,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "contributionId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "contributionId",
+        "type": "uint256"
+      }
     ],
     "name": "upvoteContribution",
     "outputs": [],
@@ -655,16 +1076,40 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
     "name": "uriNft",
-    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
     "name": "uriSBT",
-    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   }

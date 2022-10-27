@@ -36,9 +36,19 @@ interface IAmpliFrensFacade {
     function setSBTBaseURI(string calldata uri) external;
 
     /**
+     * @notice Get AmpliFrens status for address `from`
+     *
+     * @param from The address to query status for
+     *
+     * @return Status of type `DataTypes.Frenstatus`
+     */
+    function sbtStatus(address from) external view returns (DataTypes.FrenStatus);
+
+    /**
      * @notice Get the contribution associated with token of id `id`
      *
      * @param id The token id
+     *
      * @return Contribution of type `DataTypes.Contribution`
      */
     function getSBTById(uint256 id) external view returns (DataTypes.Contribution memory);
