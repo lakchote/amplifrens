@@ -9,21 +9,57 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   const ethers = hre.ethers;
   const accounts = await ethers.getSigners();
   const contributions = [
-    { title: "StarkNet Staking Rewards Template", category: 7 },
-    { title: "Hyperapps: a primitive for a new internet", category: 4 },
-    { title: "Ethan Buchman on the BSC Hack", category: 3 },
-    { title: "Virtual Society, Blockchains, and The Metaverse", category: 1 },
-    { title: "$BTRFLY 2.0", category: 4 },
-    { title: "DeGods removing NFT royalties", category: 0 },
-    { title: "Collection.xyz launch", category: 0 },
-    { title: "All things NFTs with Kevin rose and Chris Dixon", category: 6 },
-    { title: "Brian Armstrong reflects on Coinbase origin story", category: 6 },
-    { title: "Analysis Binance Bridge hack - open questions & open points", category: 3 },
-    { title: "Stablecoins are a misunderstood DeFi primitive", category: 2 },
-    { title: "How a derivative project became arguably the best gaming ecosystem", category: 5 },
-    { title: "X2Y2 P2P NFT loan", category: 0 },
-    { title: "Celsius doxxed me", category: 7 },
-    { title: "Llamalend contracts", category: 7 },
+    {
+      title: "The ArtGobblers Competition",
+      category: 4,
+      url: "https://twitter.com/0xmisaka/status/1585032905516257280",
+    },
+    { title: "The Reddit NFTs Thesis", category: 0, url: "https://page1.substack.com/p/the-reddit-nfts-thesis" },
+    {
+      title: "Reddit avoids crypto lingo, shows how to take NFTs mainstream",
+      category: 0,
+      url: "https://www.theblock.co/post/179797/reddit-avoids-crypto-lingo-shows-how-to-take-nfts-mainstream",
+    },
+    {
+      title: "Real World Assets: Finance’s bridge to crypto",
+      category: 2,
+      url: "https://research.thetie.io/real-world-assets/",
+    },
+    {
+      title: "Everything you need to know about on-chain bonds",
+      category: 4,
+      url: "https://twitter.com/SolvProtocol/status/1585070988068548608",
+    },
+    { title: "The state of ETH L2s", category: 1, url: "https://alphapls.substack.com/p/the-state-of-ethereum-l2s" },
+    { title: "Sui Foundation Grants", category: 1, url: "https://suifoundation.org/#grant" },
+    { title: "Near Protocol’s USN Stablecoin Shut Down", category: 1, url: "https://thedefiant.io/usn-unwinds" },
+    {
+      title: "SAFU: Creating a Standard for Whitehats",
+      category: 3,
+      url: "https://jumpcrypto.com/safu-creating-a-standard-for-whitehats/",
+    },
+    {
+      title: "Web3 Social usage and engagement",
+      category: 4,
+      url: "https://twitter.com/messaricrypto/status/1584916770825142273",
+    },
+    {
+      title: "BNB chain 10M fund",
+      category: 1,
+      url: "https://www.coindesk.com/business/2022/10/25/bnb-chain-introduces-10m-fund-to-incentive-project-growth-on-the-blockchain/",
+    },
+    { title: "EIP-4844 with Dankrad", category: 6, url: "https://www.youtube.com/watch?v=F0u5BNZYhMQ" },
+    {
+      title: "Vyper version of the ERC-20 + EIP-2612 standards P2P NFT loan",
+      category: 7,
+      url: "https://github.com/pcaversaccio/snekmate/blob/main/src/tokens/ERC20.vy",
+    },
+    {
+      title: "Burning MEV through block proposer auctions",
+      category: 7,
+      url: "https://ethresear.ch/t/burning-mev-through-block-proposer-auctions/14029",
+    },
+    { title: "Play to Die", category: 5, url: "https://davestanton.substack.com/p/new-nftcrypto-game-model-play-to" },
   ];
 
   const facadeFactory = await ethers.getContractFactory("AmpliFrensFacade");
@@ -37,7 +73,7 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   for (let i = 0; i < contributions.length; i++) {
     const createContributionTx = await proxyContract
       .connect(accounts[++accountIndex])
-      .createContribution(contributions[i].category, contributions[i].title, "https://www.dummy.xyz");
+      .createContribution(contributions[i].category, contributions[i].title, contributions[i].url);
     await createContributionTx.wait();
   }
 
@@ -56,11 +92,16 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   console.log("Updating contribution with id 1...");
   const updateContributionTx = await proxyContract
     .connect(accounts[1])
-    .updateContribution(1, 7, "TEST update", "https://www.test.xyz");
+    .updateContribution(
+      1,
+      3,
+      "Harpie launches first on-chain firewall",
+      "https://twitter.com/harpieio/status/1585300270686568448"
+    );
   await updateContributionTx.wait();
 
-  console.log("Removing contribution with id 4...");
-  const removeContributionTx = await proxyContract.connect(accounts[1]).removeContribution(4);
+  console.log("Removing contribution with id 15...");
+  const removeContributionTx = await proxyContract.connect(accounts[1]).removeContribution(15);
   await removeContributionTx.wait();
 
   console.log(`Creating profile for account ${accounts[2].address}...`);
@@ -89,13 +130,11 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   const removeProfileTx = await proxyContract.connect(accounts[1]).deleteUserProfile(accounts[4].address);
   await removeProfileTx.wait();
 
-  console.log("Increasing EVM time to mint a SBT for the contribution of the day...");
-  await hre.network.provider.send("evm_increaseTime", [1000 * 60 * 60 * 24]);
-  await hre.network.provider.send("evm_mine");
-
-  console.log("Performing upkeep...");
-  const performUpkeepTx = await proxyContract.connect(accounts[2]).performUpkeep(ethers.utils.toUtf8Bytes("0x00"));
-  await performUpkeepTx.wait();
+  if (hre.network.name === "localhost") {
+    console.log("Increasing EVM time to mint a SBT for the contribution of the day...");
+    await hre.run("increase-time");
+    await hre.run("perform-upkeep");
+  }
 });
 
 async function createProfile(proxyContract: Contract, signer: Signer) {

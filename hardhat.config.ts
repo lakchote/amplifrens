@@ -7,6 +7,7 @@ import "@nomiclabs/hardhat-solhint";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
+import "hardhat-contract-sizer";
 import "@graphprotocol/hardhat-graph";
 
 dotenv.config();
