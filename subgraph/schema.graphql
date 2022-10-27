@@ -22,6 +22,8 @@ type Profile @entity {
 type SBTLeaderboard @entity {
   id: ID!
   topContributionsCount: BigInt!
+  username: String
+  status: Int!
 }
 
 type SBTBestContribution @entity {

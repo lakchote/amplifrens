@@ -1,10 +1,11 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import {
+  AmpliFrensSBT,
   SBTBestContribution as SBTBestContributionEvent,
   SBTMinted as SBTMintedEvent,
   SBTRevoked as SBTRevokedEvent,
 } from "../generated/AmpliFrensSBT/AmpliFrensSBT";
-import { Contribution, SBTBestContribution, SBTLeaderboard, SBTMinted, SBTRevoked } from "../generated/schema";
+import { Contribution, Profile, SBTBestContribution, SBTLeaderboard, SBTMinted, SBTRevoked } from "../generated/schema";
 
 export function handleSBTBestContribution(event: SBTBestContributionEvent): void {
   let entity = new SBTBestContribution(event.params.topContributionId.toString());
@@ -22,6 +23,8 @@ export function handleSBTBestContribution(event: SBTBestContributionEvent): void
 
 export function handleSBTMinted(event: SBTMintedEvent): void {
   let entity = new SBTMinted(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+  let contract = AmpliFrensSBT.bind(event.address);
+
   entity.owner = event.params.owner;
   entity.tokenId = event.params.tokenId;
   entity.timestamp = event.params.timestamp;
@@ -31,9 +34,14 @@ export function handleSBTMinted(event: SBTMintedEvent): void {
   if (!sbtLeaderboard) {
     sbtLeaderboard = new SBTLeaderboard(event.params.owner.toHexString());
     sbtLeaderboard.topContributionsCount = BigInt.fromI32(1);
+    const profile = Profile.load(event.params.owner.toHexString());
+    if (profile) {
+      sbtLeaderboard.username = profile.username;
+    }
   } else {
     sbtLeaderboard.topContributionsCount = sbtLeaderboard.topContributionsCount.plus(BigInt.fromI32(1));
   }
+  sbtLeaderboard.status = contract.getStatus(event.params.owner);
   sbtLeaderboard.save();
 }
 
