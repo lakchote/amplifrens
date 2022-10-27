@@ -287,6 +287,36 @@ describe("Contribution", async () => {
       expect(await contribution.votes).to.eq(9);
     });
 
+    it("Should be possible to downvote a contribution again after upvoting it", async () => {
+      const createTx = await contributionContract.create(
+        2,
+        "The Blockchain Trilemna Explained",
+        "https://www.eth.xyz",
+        accounts[0].address
+      );
+      await createTx.wait();
+      const firstUpvoteTx = await contributionContract.upvote(2, accounts[1].address);
+      await firstUpvoteTx.wait();
+
+      const downvoteTx = await contributionContract.downvote(2, accounts[2].address);
+      await downvoteTx.wait();
+      const upvoteTx = await contributionContract.upvote(2, accounts[2].address);
+      await upvoteTx.wait();
+      expect(await contributionContract.downvote(2, accounts[2].address)).to.not.be.revertedWithCustomError(
+        errorsLib,
+        "AlreadyVoted"
+      );
+    });
+
+    it("Should be possible to upvote a contribution again after downvoting it", async () => {
+      const downvoteTx = await contributionContract.downvote(1, accounts[2].address);
+      await downvoteTx.wait();
+      expect(await contributionContract.upvote(1, accounts[2].address)).to.not.be.revertedWithCustomError(
+        errorsLib,
+        "AlreadyVoted"
+      );
+    });
+
     it("Should be possible to upvote only once for a contribution", async () => {
       await expect(contributionContract.upvote(1, accounts[1].address)).to.be.revertedWithCustomError(
         errorsLib,
@@ -314,6 +344,21 @@ describe("Contribution", async () => {
       await expect(contributionContract.upvote(1, accounts[0].address)).to.be.revertedWithCustomError(
         errorsLib,
         "Unauthorized"
+      );
+    });
+
+    it("Should not be possible to downvote a contribution with 0 votes", async () => {
+      const createTx = await contributionContract.create(
+        2,
+        "The Blockchain Trilemna Explained",
+        "https://www.eth.xyz",
+        accounts[0].address
+      );
+      await createTx.wait();
+
+      await expect(contributionContract.downvote(2, accounts[2].address)).to.be.revertedWithCustomError(
+        errorsLib,
+        "OutOfBounds"
       );
     });
 

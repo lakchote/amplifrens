@@ -91,6 +91,8 @@ library ContributionLogic {
         container.upvoterAddresses.push(from);
         container.upvotedIds.push(contributionId);
 
+        container.downvoted[contributionId][from] = false;
+
         ++container.dayContributions[contribution.dayCounter][contributionId].votes;
 
         emit ContributionUpvoted(from, contributionId, block.timestamp);
@@ -114,10 +116,14 @@ library ContributionLogic {
         isValidContributionId(contributionId, container.validContributionIds)
     {
         DataTypes.Contribution storage contribution = container.contribution[contributionId];
+        if (contribution.votes == 0) revert Errors.OutOfBounds();
+
         --contribution.votes;
         container.downvoted[contributionId][from] = true;
         container.downvoterAddresses.push(from);
         container.downvotedIds.push(contributionId);
+
+        container.upvoted[contributionId][from] = false;
 
         --container.dayContributions[contribution.dayCounter][contributionId].votes;
 
