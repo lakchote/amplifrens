@@ -15,7 +15,7 @@ AmpliFrens helps you in 3 ways:
 
 Every day, people can share crypto news and vote on the best contributions.
 
-After 24 hours, the author of the best contribution receives a _Soulbound token_. This token proves his value and crypto knowledge.
+After 24 hours, the author of the best contribution receives a _Soulbound token_. This token proves his value and crypto knowledge thanks to the blockchain.
 
 By gaining more and more Soulbound tokens, one can level up to a new status that will give them exclusive perks.
 
@@ -92,3 +92,8 @@ To use The Graph use the following steps:
 
 4. Access subgraph UI
    `http://127.0.0.1:8000/subgraphs/name/amplifrens/`
+
+## Room of improvements
+
+- Use meta transactions to have a gasless experience for the user
+- Use access roles in the future (example: to elect moderators voted by the community) 
