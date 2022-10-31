@@ -6,6 +6,12 @@ import { Contract, Signer } from "ethers";
 config();
 
 task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(async (args, hre) => {
+  if (!["hardhat", "localhost"].includes(hre.network.name)) {
+    console.error("Only hardhat and localhost networks are allowed for fixtures.");
+
+    return 1;
+  }
+
   const ethers = hre.ethers;
   const accounts = await ethers.getSigners();
   const contributions = [
@@ -130,11 +136,9 @@ task("fixtures-full", "Create full fixtures for Hardhat local node").setAction(a
   const removeProfileTx = await proxyContract.connect(accounts[1]).deleteUserProfile(accounts[4].address);
   await removeProfileTx.wait();
 
-  if (hre.network.name === "localhost") {
-    console.log("Increasing EVM time to mint a SBT for the contribution of the day...");
-    await hre.run("increase-time");
-    await hre.run("perform-upkeep");
-  }
+  console.log("Increasing EVM time to mint a SBT for the contribution of the day...");
+  await hre.run("increase-time");
+  await hre.run("perform-upkeep");
 });
 
 async function createProfile(proxyContract: Contract, signer: Signer) {

@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import addressesJson from "../addresses.json";
+import addressesJson from "../../addresses.json";
 
 task("perform-upkeep", "Perform upkeep to mint contribution of the day").setAction(async (args, hre) => {
   const ethers = hre.ethers;

@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 import { config } from "dotenv";
-import * as facadeJson from "../artifacts/contracts/interfaces/IAmpliFrensFacade.sol/IAmpliFrensFacade.json";
-import { IAmpliFrensFacade } from "../typechain-types/contracts/interfaces/IAmpliFrensFacade";
+import * as facadeJson from "../../artifacts/contracts/interfaces/IAmpliFrensFacade.sol/IAmpliFrensFacade.json";
+import { IAmpliFrensFacade } from "../../typechain-types/contracts/interfaces/IAmpliFrensFacade";
 
 config();
 
@@ -13,9 +13,13 @@ task("mint-nfts", "Mint NFTs for address specified")
     const ethers = hre.ethers;
     if (!ethers.utils.isAddress(args.to)) {
       console.error(`The recipient's address ${args.to} is not a valid.`);
+
+      return 1;
     }
     if (!ethers.utils.isAddress(args.proxy)) {
       console.error(`The proxy address ${args.address} is not a valid.`);
+
+      return 1;
     }
 
     const signer = ["hardhat", "localhost"].includes(hre.network.name)
