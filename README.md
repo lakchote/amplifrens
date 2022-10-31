@@ -93,6 +93,13 @@ To use The Graph use the following steps:
 4. Access subgraph UI
    `http://127.0.0.1:8000/subgraphs/name/amplifrens/`
 
+## NFTs
+
+NFTs are deployed on IPFS:
+
+- [images](https://ipfs.io/ipfs/QmQVjtxtx25WQ1tVv2AZGYkHTQbLHWhPWqbBHfKB54bjxw/)
+- [metadata](https://ipfs.io/ipfs/QmcczjZpSKGSiAEPjm1VqU5xUeFLWrVtc61ZKZmwn6JDEF/)
+
 ## Room of improvements
 
 - Use meta transactions to have a gasless experience for the user
