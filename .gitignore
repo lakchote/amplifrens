@@ -1,0 +1,29 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+yarn-error.log
+
+# Hardhat files
+cache
+artifacts
+gas_report*.txt
+
+# OpenZeppelin Upgrades (dev)
+.openzeppelin/unknown-*.json
+
+# NFTs metadata
+nfts/metadata
+
+# Subgraph
+subgraph/generated
+subgraph/build
+subgraph/tests
+
+# Docker container for The Graph
+data/
+
+# Mac specific
+.DS_STORE

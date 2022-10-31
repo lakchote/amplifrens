@@ -1,0 +1,147 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: AmpliFrensNFT
+    network: localhost
+    source:
+      address: "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+      abi: AmpliFrensNFT
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - Transfer
+      abis:
+        - name: AmpliFrensNFT
+          file: ./abis/AmpliFrensNFT.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/ampli-frens-nft.ts
+  - kind: ethereum
+    name: AmpliFrensSBT
+    network: localhost
+    source:
+      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
+      abi: AmpliFrensSBT
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SBTBestContribution
+        - SBTMinted
+        - SBTRevoked
+      abis:
+        - name: AmpliFrensSBT
+          file: ./abis/AmpliFrensSBT.json
+      eventHandlers:
+        - event: SBTBestContribution(uint256,indexed address,uint256)
+          handler: handleSBTBestContribution
+        - event: SBTMinted(indexed address,indexed uint256,uint256)
+          handler: handleSBTMinted
+        - event: SBTRevoked(indexed address,indexed uint256,uint256)
+          handler: handleSBTRevoked
+      file: ./src/ampli-frens-sbt.ts
+  - kind: ethereum
+    name: AmpliFrensContribution
+    network: localhost
+    source:
+      address: "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
+      abi: AmpliFrensContribution
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - ContributionCreated
+        - ContributionDownvoted
+        - ContributionRemoved
+        - ContributionUpdated
+        - ContributionUpvoted
+      abis:
+        - name: AmpliFrensContribution
+          file: ./abis/AmpliFrensContribution.json
+      eventHandlers:
+        - event: ContributionCreated(indexed address,uint256,uint256,uint8,string,string)
+          handler: handleContributionCreated
+        - event: ContributionDownvoted(indexed address,indexed uint256,uint256)
+          handler: handleContributionDownvoted
+        - event: ContributionRemoved(indexed address,indexed uint256,uint256)
+          handler: handleContributionRemoved
+        - event: ContributionUpdated(indexed address,uint256,uint256,uint8,string,string)
+          handler: handleContributionUpdated
+        - event: ContributionUpvoted(indexed address,indexed uint256,uint256)
+          handler: handleContributionUpvoted
+      file: ./src/ampli-frens-contribution.ts
+  - kind: ethereum
+    name: AmpliFrensProfile
+    network: localhost
+    source:
+      address: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"
+      abi: AmpliFrensProfile
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - ProfileBlacklisted
+        - ProfileCreated
+        - ProfileDeleted
+        - ProfileUpdated
+      abis:
+        - name: AmpliFrensProfile
+          file: ./abis/AmpliFrensProfile.json
+      eventHandlers:
+        - event: ProfileBlacklisted(address,string,uint256)
+          handler: handleProfileBlacklisted
+        - event: ProfileCreated(indexed address,uint256,string)
+          handler: handleProfileCreated
+        - event: ProfileDeleted(indexed address,uint256)
+          handler: handleProfileDeleted
+        - event: ProfileUpdated(indexed address,string,uint256)
+          handler: handleProfileUpdated
+      file: ./src/ampli-frens-profile.ts
+  - kind: ethereum
+    name: AmpliFrensFacade
+    network: localhost
+    source:
+      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
+      abi: AmpliFrensFacade
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Initialized
+        - Paused
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - Unpaused
+      abis:
+        - name: AmpliFrensFacade
+          file: ./abis/AmpliFrensFacade.json
+      eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Paused(address)
+          handler: handlePaused
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: Unpaused(address)
+          handler: handleUnpaused
+      file: ./src/ampli-frens-facade.ts
