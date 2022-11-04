@@ -94,6 +94,25 @@ describe("Soulbound Token", async () => {
       ).to.be.revertedWithCustomError(errorsLib, "MintingIntervalNotMet");
     });
 
+    it("Should revert if contribution's author is null", async () => {
+      await increaseTime();
+      await expect(
+        sbtContract.mint({
+          contribution: {
+            author: ethers.utils.hexZeroPad("0x", 20),
+            category: contributionCategory,
+            valid: true,
+            timestamp: timestamp,
+            votes: 500,
+            dayCounter: 1,
+            title: title,
+            url: url,
+          },
+          topContributionId: 1,
+        })
+      ).to.be.revertedWithCustomError(errorsLib, "AddressNull");
+    });
+
     it("Should increase the total tokens counter for address", async () => {
       increaseTime();
       const secondMintTx = await sbtContract.mint({

@@ -26,6 +26,7 @@ library Errors {
     error AlreadyVoted();
     error NotAuthorOrAdmin();
     error NotAuthor();
+    error NoTopContribution();
 
     /// @dev NFT errors
     error MaxSupplyReached();

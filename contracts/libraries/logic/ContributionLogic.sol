@@ -373,6 +373,8 @@ library ContributionLogic {
             }
         }
 
+        if (topVotes == 0) revert Errors.NoTopContribution();
+
         return DataTypes.TopContribution(container.contribution[topContributionId], topContributionId);
     }
 }
