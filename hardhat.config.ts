@@ -49,6 +49,7 @@ const config = {
     hardhat: {
       // To prevent collision with proxy because admin address = accounts[1] in local deployments
       from: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+      allowUnlimitedContractSize: true,
     },
   },
   solidity: {
