@@ -54,6 +54,7 @@ library SBTLogic {
         _tokenIdCounter.increment();
         uint256 currentTokenId = _tokenIdCounter.current();
         DataTypes.Contribution memory contribution = topContribution.contribution;
+        if (contribution.author == address(0)) revert Errors.AddressNull();
 
         _tokens[currentTokenId] = DataTypes.Contribution(
             contribution.author,

@@ -228,16 +228,20 @@ describe("Contribution", async () => {
   });
 
   describe("Voting", async () => {
-    beforeEach(async () => {
-      const createTx = await contributionContract.create(contributionCategory, title, url, accounts[0].address);
-      await createTx.wait();
+    async function simulateVotes() {
       for (let i = 1; i <= 10; i++) {
         const voteTx = await contributionContract.upvote(1, accounts[i].address);
         await voteTx.wait();
       }
+    }
+
+    beforeEach(async () => {
+      const createTx = await contributionContract.create(contributionCategory, title, url, accounts[0].address);
+      await createTx.wait();
     });
 
     it("Should retrieve the most upvoted contribution for a given day", async () => {
+      await simulateVotes();
       const createTx = await contributionContract.create(
         7,
         "NEW NFT Marketplace",
@@ -267,7 +271,15 @@ describe("Contribution", async () => {
       expect(updatedTopContribution.author).to.eq(accounts[1].address);
     });
 
+    it("Should throw an error if top contribution is called and no votes were given for that day", async () => {
+      await expect(contributionContract.topContribution()).to.be.revertedWithCustomError(
+        errorsLib,
+        "NoTopContribution"
+      );
+    });
+
     it("Should increase a contribution's votes on upvote", async () => {
+      await simulateVotes();
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.votes).to.eq(10);
       expect(await contributionContract.upvote(1, accounts[11].address))
@@ -278,6 +290,7 @@ describe("Contribution", async () => {
     });
 
     it("Should decrease a contribution's votes on downvote", async () => {
+      await simulateVotes();
       let contribution = await contributionContract.getContribution(1);
       expect(await contribution.votes).to.eq(10);
       expect(await contributionContract.downvote(1, accounts[11].address))
@@ -288,6 +301,7 @@ describe("Contribution", async () => {
     });
 
     it("Should be possible to downvote a contribution again after upvoting it", async () => {
+      await simulateVotes();
       const createTx = await contributionContract.create(
         2,
         "The Blockchain Trilemna Explained",
@@ -309,6 +323,7 @@ describe("Contribution", async () => {
     });
 
     it("Should be possible to upvote a contribution again after downvoting it", async () => {
+      await simulateVotes();
       const downvoteTx = await contributionContract.downvote(1, accounts[2].address);
       await downvoteTx.wait();
       expect(await contributionContract.upvote(1, accounts[2].address)).to.not.be.revertedWithCustomError(
@@ -318,6 +333,7 @@ describe("Contribution", async () => {
     });
 
     it("Should be possible to upvote only once for a contribution", async () => {
+      await simulateVotes();
       await expect(contributionContract.upvote(1, accounts[1].address)).to.be.revertedWithCustomError(
         errorsLib,
         "AlreadyVoted"
@@ -325,6 +341,7 @@ describe("Contribution", async () => {
     });
 
     it("Should be possible to downvote only once for a contribution", async () => {
+      await simulateVotes();
       const voteTx = await contributionContract.downvote(1, accounts[1].address);
       await voteTx.wait();
       await expect(contributionContract.downvote(1, accounts[1].address)).to.be.revertedWithCustomError(
