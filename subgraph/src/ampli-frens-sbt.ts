@@ -5,7 +5,7 @@ import {
   SBTMinted as SBTMintedEvent,
   SBTRevoked as SBTRevokedEvent,
 } from "../generated/AmpliFrensSBT/AmpliFrensSBT";
-import { Contribution, Profile, SBTBestContribution, SBTLeaderboard, SBTMinted, SBTRevoked } from "../generated/schema";
+import { Contribution, Profile, SBTBestContribution, SBTLeaderboard, SBTMinted, SBTRevoked, Status } from "../generated/schema";
 
 export function handleSBTBestContribution(event: SBTBestContributionEvent): void {
   let entity = new SBTBestContribution(event.params.topContributionId.toString());
@@ -41,7 +41,12 @@ export function handleSBTMinted(event: SBTMintedEvent): void {
   } else {
     sbtLeaderboard.topContributionsCount = sbtLeaderboard.topContributionsCount.plus(BigInt.fromI32(1));
   }
-  sbtLeaderboard.status = contract.getStatus(event.params.owner);
+  const status = contract.getStatus(event.params.owner);
+  let ownerStatus = Status.load(event.params.owner.toHexString());
+  if (!ownerStatus) ownerStatus = new Status(event.params.owner.toHexString());
+  ownerStatus.status = status;
+  ownerStatus.save();
+
   sbtLeaderboard.save();
 }
 
