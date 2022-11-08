@@ -5,8 +5,9 @@
 
 Keep up with the latest crypto news, make frens and prove your value to others (employers, DAOs, anons).
 
-AmpliFrens helps you in 3 ways:
+AmpliFrens helps you in 4 ways:
 
+- It gives you a decentralized reputation system to show off your general crypto knowledge (every day the author of the most upvoted contribution receives a soulbound token contributing to his status)
 - With profiles, you can make yourself known by sharing important news.
 - With statuses, you can meet people who are as deep in the crypto rabbit hole as you are.
 - With news categories, you can stay updated on the news that matter to you.
@@ -19,17 +20,8 @@ After 24 hours, the author of the best contribution receives a _Soulbound token_
 
 By gaining more and more Soulbound tokens, one can level up to a new status that will give them exclusive perks.
 
-There are 15 NFTs to reward the most important people for the AmpliFrens community. These NFTs give access to a private discord group.
+There are 15 NFTs to reward the most important people for the AmpliFrens community. These NFTs will give you access to a private discord group.
 
-## Architecture
-
-The project uses composition over inheritance.
-
-Under the hood, it implements the [Facade design pattern](https://en.wikipedia.org/wiki/Facade_pattern) to:
-
-- hide project complexity
-- minimise tight coupling
-- ease subsystem access
 
 ## Features
 
@@ -44,6 +36,32 @@ Under the hood, it implements the [Facade design pattern](https://en.wikipedia.o
 - Transparent upgradeable proxy for the facade (_contracts/upgradeability/TransparentUpgradeableProxy.sol_):
   - [EIP-1967](https://eips.ethereum.org/EIPS/eip-1967)
   - [Why I chose Proxy instead of UUPS pattern](https://twitter.com/jeiwan7/status/1568911485602091009)
+  - Data indexation with [The Graph](https://thegraph.com/en/)
+
+## Coverage
+
+**100% of the smart contracts are covered by tests.**
+
+To check code coverage run the command:
+
+`yarn coverage`
+
+## Architecture
+
+The project uses composition over inheritance.
+
+Under the hood, it implements the [Facade design pattern](https://en.wikipedia.org/wiki/Facade_pattern) to:
+
+- hide project complexity
+- minimise tight coupling
+- ease subsystem access
+
+## Deployments
+
+Project is deployed on:
+- Mumbai
+   - [Proxy](https://mumbai.polygonscan.com/address/0xDC6BA47de41736878d951CC4774eC2973f9Ca0A9)
+   - [Impl](https://mumbai.polygonscan.com/address/0x10DC5b75D33955BB1a7393c5Fcf2c5ea4377e295)
 
 ## Install
 
@@ -59,14 +77,6 @@ Under the hood, it implements the [Facade design pattern](https://en.wikipedia.o
 
 `yarn hardhat-local`
 `yarn test`
-
-## Coverage
-
-**100% of the smart contracts are covered by tests.**
-
-To check code coverage run the command:
-
-`yarn coverage`
 
 ## The Graph
 
