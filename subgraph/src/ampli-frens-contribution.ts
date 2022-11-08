@@ -14,6 +14,7 @@ import {
   ContributionUpdated,
   ContributionUpvoted,
   Profile,
+  Status,
 } from "../generated/schema";
 
 const deadAddress = Address.fromString("0x000000000000000000000000000000000000dEaD");
@@ -46,6 +47,9 @@ export function handleContributionCreated(event: ContributionCreatedEvent): void
     contribution.hasProfile = true;
     contribution.username = profile.username;
   }
+
+  const fromStatus = Status.load(event.params.from.toHexString());
+  contribution.fromStatus = fromStatus ? fromStatus.status : 0;
 
   contribution.save();
 }

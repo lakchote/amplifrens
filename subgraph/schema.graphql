@@ -10,6 +10,7 @@ type Contribution @entity {
   username: String
   hasProfile: Boolean!
   bestContribution: Boolean!
+  fromStatus: Int!
 }
 
 type Profile @entity {
@@ -23,6 +24,10 @@ type SBTLeaderboard @entity {
   id: ID!
   topContributionsCount: BigInt!
   username: String
+}
+
+type Status @entity {
+  id: ID!
   status: Int!
 }
 
