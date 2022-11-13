@@ -3,6 +3,8 @@
 ![Tests coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen "Tests coverage")
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
 
+[LIVE Demo (Mumbai)](https://empty-hat-4319.on.fleek.co/)
+
 Keep up with the latest crypto news, make frens and prove your value to others (employers, DAOs, anons).
 
 AmpliFrens helps you in 4 ways:
